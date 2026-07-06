@@ -17,7 +17,7 @@ const getAllProducts = async (req, res) => {
             limit = 5
         } = req.query;
         
-        // 2. Строим SQL запрос - НАЧИНАЕМ С SELECT
+        // 2. Строим SQL запрос
         let sql = 'SELECT * FROM products';
         const values = [];
         const conditions = [];
@@ -48,20 +48,15 @@ const getAllProducts = async (req, res) => {
             conditions.push('brand LIKE ?');
             values.push(`%${brand}%`);
         }
-      
         
         if (on_sale === 'true') {
             conditions.push('old_price IS NOT NULL');
         }
 
-
         // 4. Если есть условия - добавляем WHERE
         if (conditions.length > 0) {
             sql += ' WHERE ' + conditions.join(' AND ');
         }
-
-
-
 
         // 5. Добавляем сортировку
         const allowedSortFields = ['id', 'name', 'price', 'quantity', 'created_at', 'brand'];
@@ -70,27 +65,32 @@ const getAllProducts = async (req, res) => {
         sql += ` ORDER BY ${sortField} ${sortDirection}`;
         
         // 6. Добавляем пагинацию (ПОСЛЕ ORDER BY!)
-        // Преобразуем в числа
         const pageNum = parseInt(page) || 1;
         const limitNum = parseInt(limit) || 10;
-        const offset = (pageNum - 1) * limitNum; // Смещение
+        const offset = (pageNum - 1) * limitNum;
         
+        // ✅ ВАЖНО: ВСТАВЛЯЕМ LIMIT И OFFSET НАПРЯМУЮ В SQL
         sql += ` LIMIT ${Number(limitNum)} OFFSET ${Number(offset)}`;
-
         
         console.log('SQL:', sql);
-        console.log('Values:', values);
+        console.log('Values (для фильтров):', values);
         console.log('Page:', pageNum, 'Limit:', limitNum, 'Offset:', offset);
         
-        // 7. Выполняем запрос
+        // 7. Выполняем основной запрос
         const [rows] = await pool.execute(sql, values);
         
         // 8. Получаем общее количество товаров (для пагинации)
+        // ✅ СОХРАНЯЕМ значения для COUNT (без LIMIT и OFFSET)
+        const countValues = [...values]; // Копируем значения фильтров
         let countSql = 'SELECT COUNT(*) as total FROM products';
         if (conditions.length > 0) {
             countSql += ' WHERE ' + conditions.join(' AND ');
         }
-        const [countResult] = await pool.execute(countSql, values.slice(0, -2));
+        
+        console.log('COUNT SQL:', countSql);
+        console.log('COUNT Values:', countValues);
+        
+        const [countResult] = await pool.execute(countSql, countValues);
         const total = countResult[0].total;
         
         // 9. Отправляем ответ
@@ -116,8 +116,6 @@ const getAllProducts = async (req, res) => {
         });
     }
 };
-
-
 
 // Функция для получения одного товара по ID
 const getProductById = async (req, res) => {

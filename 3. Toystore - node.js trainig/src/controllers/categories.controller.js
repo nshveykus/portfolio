@@ -8,12 +8,43 @@ const getAllCategories = async (req, res) => {
         const [rows] = await pool.execute(
             'SELECT * FROM categories ORDER BY id ASC'
         );
+
+        // 2. Если категорий нет - возвращаем пустой массив
+        if (rows.length === 0) {
+            return res.json({
+                success: true,
+                data: [],
+                message: 'Категории не найдены'
+            });
+        }
+
+      // 3. Строим дерево категорий
+        // Создаем карту всех категорий по id
+        const categoriesMap = {};
+        rows.forEach(cat => {
+            categoriesMap[cat.id] = {
+                ...cat,
+                children: [] // добавляем поле для дочерних категорий
+            };
+        });
+        // 4. Формируем дерево
+        const tree = [];
+        rows.forEach(cat => {
+            // Если есть parent_id и родитель существует
+            if (cat.parent_id && categoriesMap[cat.parent_id]) {
+                // Добавляем текущую категорию в children родителя
+                categoriesMap[cat.parent_id].children.push(categoriesMap[cat.id]);
+            } else {
+                // Если parent_id = NULL или родитель не найден - это корневая категория
+                tree.push(categoriesMap[cat.id]);
+            }
+        });
         
         // Отправляем ответ
         res.json({
             success: true,
             count: rows.length,
-            data: rows
+            data: tree
         });
         
     } catch (error) {
