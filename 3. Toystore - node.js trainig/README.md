@@ -7,22 +7,22 @@
 - **mysql2** — драйвер для MySQL (с поддержкой async/await)
 - **dotenv** — управление переменными окружения
 
-## 📋 План эндпоинтов
+##  План эндпоинтов
 
 | Метод | Эндпоинт | Описание | Статус |
 | :---: | :--- | :--- | :---: |
 | **БАЗОВЫЕ** | | | |
 | GET | `/api/products` | Все товары | ✔ |
 | GET | `/api/products/:id` | Один товар по ID | ✔ |
-| GET | `/api/categories` | Все категории | |
+| GET | `/api/categories` | Все категории |✔ |
 | GET | `/api/products?category=:id` | Фильтрация по категории | ✔ |
 | GET | `/api/products?search=:query` | Поиск по названию | ✔ |
 | GET | `/api/products?page` | Пагинация | ✔ |
 | | | | |
 | **АУТЕНТИФИКАЦИЯ** | | | |
-| POST | `/api/users/register` | Регистрация пользователя | |
-| POST | `/api/users/login` | Вход (получение токена) | |
-| GET | `/api/users/profile` | Профиль пользователя (защищенный) | |
+| POST | `/api/users/register` | Регистрация пользователя | ✔ |
+| POST | `/api/users/login` | Вход (получение токена) | ✔ |
+| GET | `/api/users/profile` | Профиль пользователя (защищенный) | ⚡ |
 | PUT | `/api/users/profile` | Обновление профиля (защищенный) | |
 | | | | |
 | **КОРЗИНА** | | | |

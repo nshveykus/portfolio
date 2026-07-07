@@ -5,21 +5,23 @@ require('dotenv').config();
 // Импортируем наши маршруты
 const productRoutes = require('./src/routes/product.routes');
 const categoriesRoutes = require('./src/routes/categories.routes');
+const userRoutes = require('./src/routes/user.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Middleware
+app.use(express.json());
 
 // Проверяем подключение к БД
 testConnection();
 
 // ============= МАРШРУТЫ =============
-
-// Главный маршрут для товаров
 app.use('/api/products', productRoutes);
-// Маршрут для категорий
 app.use('/api/category', categoriesRoutes);
+app.use('/api/auth', userRoutes);
 
-// Простые проверочные маршруты
+// ============= ПРОВЕРОЧНЫЕ МАРШРУТЫ =============
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'Сервер работает' });
 });
@@ -41,12 +43,38 @@ app.get('/api/test-db', async (req, res) => {
     }
 });
 
-// Запускаем сервер
+// ============= ОБРАБОТКА ОШИБОК =============
+app.use((err, req, res, next) => {
+    console.error('Ошибка:', err);
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || 'Внутренняя ошибка сервера'
+    });
+});
+
+// ============= ЗАПУСК =============
 app.listen(PORT, () => {
-    console.log(`Сервер на http://localhost:${PORT}`);
-    console.log('Проверка: http://localhost:5000/api/health');
-    console.log('Проверка БД: http://localhost:5000/api/test-db');
-    console.log('Товары: http://localhost:5000/api/products');
-    console.log('Категории: http://localhost:5000/api/category');
-    console.log('Для остановки нажмите Ctrc+C');
+    console.log('\n Сервер запущен!');
+    console.log(`📍 http://localhost:${PORT}\n`);
+    
+    console.log(' Проверка:');
+    console.log('   GET  /api/health');
+    console.log('   GET  /api/test-db\n');
+    
+    console.log(' Товары:');
+    console.log('   GET  /api/products');
+    console.log('   GET  /api/products/:id\n');
+    
+    console.log(' Категории:');
+    console.log('   GET  /api/category');
+    console.log('   GET  /api/category/:id\n');
+    
+    console.log(' Аутентификация:');
+    console.log('   POST /api/auth/register');
+    console.log('   POST /api/auth/login');
+    console.log('   POST /api/auth/refresh');
+    console.log('   POST /api/auth/logout (с токеном)');
+    console.log('   GET  /api/auth/profile (с токеном)\n');
+    
+    console.log('  Для остановки нажмите Ctrl+C');
 });
