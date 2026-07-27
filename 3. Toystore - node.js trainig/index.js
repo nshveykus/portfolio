@@ -2,6 +2,11 @@ const express = require('express');
 const { pool, testConnection } = require('./db');
 require('dotenv').config();
 
+// Запускаем планировщик (если не в тестовом режиме)
+if (process.env.NODE_ENV !== 'test') {
+    require('./src/scheduler');
+}
+
 // Импортируем наши маршруты
 const productRoutes = require('./src/routes/product.routes');
 const categoriesRoutes = require('./src/routes/categories.routes');
@@ -75,6 +80,7 @@ app.listen(PORT, () => {
     console.log('   POST /api/auth/refresh');
     console.log('   POST /api/auth/logout (с токеном)');
     console.log('   GET  /api/auth/profile (с токеном)\n');
+    console.log('   PUT  /api/auth/profile (с токеном)\n');
     
     console.log('  Для остановки нажмите Ctrl+C');
 });

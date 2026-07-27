@@ -93,6 +93,8 @@ const register = async (req, res) => {
     }
 };
 
+
+
 // Логин пользователя
 const login = async (req, res) => {
     try {
@@ -155,6 +157,7 @@ const login = async (req, res) => {
         });
     }
 };
+
 
 
 // Обновление токена
@@ -276,12 +279,62 @@ const getProfile = async (req, res) => {
     }
 };
 
-// ============ ЭКСПОРТ ============
+// ОБНОВЛЕНИЕ ПРОФИЛЯ 
+const updateProfile = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { first_name, last_name, phone, birth_date, password } = req.body;
+
+        // Собираем данные для обновления
+        const updateData = {};
+        if (first_name) updateData.first_name = first_name;
+        if (last_name) updateData.last_name = last_name;
+        if (phone !== undefined) updateData.phone = phone;
+        if (birth_date !== undefined) updateData.birth_date = birth_date;
+        if (password) updateData.password = password;
+
+        // Проверяем, есть ли что обновлять
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Нет данных для обновления'
+            });
+        }
+
+        // Обновляем пользователя
+        const updatedUser = await User.update(userId, updateData);
+
+        if (!updatedUser) {
+            return res.status(404).json({
+                success: false,
+                message: 'Пользователь не найден'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Профиль успешно обновлен',
+            data: updatedUser
+        });
+
+    } catch (error) {
+        console.error('Ошибка обновления профиля:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Ошибка при обновлении профиля',
+            error: error.message
+        });
+    }
+};
+
+
+//  ЭКСПОРТ 
 
 module.exports = {
     register,
     login,
     refreshToken,
     logout,
-    getProfile
+    getProfile,
+    updateProfile
 };

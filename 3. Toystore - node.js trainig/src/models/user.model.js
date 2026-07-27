@@ -42,6 +42,43 @@ class User {
     static async comparePassword(user, password) {
         return bcrypt.compare(password, user.password_hash);
     }
+    // Обновление профиля
+    static async update(id, userData) {
+        // Собираем поля, которые можно обновлять
+        const allowedFields = ['first_name', 'last_name', 'phone', 'birth_date'];
+        const updates = [];
+        const values = [];
+
+        for (const field of allowedFields) {
+            if (userData[field] !== undefined) {
+                updates.push(`${field} = ?`);
+                values.push(userData[field]);
+            }
+        }
+
+        // Если обновляем пароль
+        if (userData.password) {
+            const hashedPassword = await bcrypt.hash(userData.password, 10);
+            updates.push('password_hash = ?');
+            values.push(hashedPassword);
+        }
+
+        // Если нет полей для обновления
+        if (updates.length === 0) {
+            return null;
+        }
+
+
+        // Выполняем запрос
+        values.push(id);
+        await pool.execute(
+            `UPDATE users SET ${updates.join(', ')} WHERE id = ?`,
+            values
+        );
+
+        // Возвращаем обновленного пользователя
+        return this.findById(id);
+    }
 }
 
 module.exports = User;

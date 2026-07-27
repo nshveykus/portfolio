@@ -57,8 +57,10 @@ class RefreshToken {
         const [result] = await pool.execute(
             'DELETE FROM refresh_tokens WHERE expires_at < NOW() OR is_revoked = TRUE'
         );
+        console.log(`Удалено ${result.affectedRows} старых токенов`);
         return result.affectedRows;
     }
+    
 
     // Получить все активные токены пользователя (для отладки)
     static async getUserTokens(userId) {
