@@ -1,16 +1,83 @@
 # Я начинаю изучать node.js!
 ### В этом проекте я подниму рабочий бэкенд для предыдущего моего проекта
 
+**RESTful API**  
+Учебный проект, демонстрирующий навыки разработки бэкенда на **Node.js** с использованием **Express** и **MySQL**.
+
+[![Node.js](https://img.shields.io/badge/Node.js-18.x-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-4.18.x-000000?logo=express&logoColor=white)](https://expressjs.com/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.x-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
+
+##  Технологии  
+
 - **Node.js** — среда выполнения
 - **Express.js** — веб-фреймворк
 - **MySQL** — база данных
 - **mysql2** — драйвер для MySQL (с поддержкой async/await)
 - **dotenv** — управление переменными окружения
+- **jsonwebtoken (JWT)** — аутентификация и авторизация
+- **bcryptjs** — хеширование паролей
+- **node-cron** — планировщик задач
+
+## Примеры запросов
+POST /api/auth/register
+```json
+{
+    "email": "user@mail.ru",
+    "password": "123456",
+    "first_name": "Иван",
+    "last_name": "Петров",
+    "phone": "+7-900-123-45-67"
+}
+```  
+Полная документация по эндпоинтам и примеры запросов - [API_EXAMPLES.md](./API_EXAMPLES.md)
+
+ ## Безопасность  
+Защита от SQL-инъекций:
+- Использование плейсхолдеров ? во всех запросах
+- Белые списки полей для обновления
+- Валидация полей сортировки
+
+Аутентификация:
+
+- Access токен живет 15 минут
+
+- Refresh токен живет 7 дней
+
+- Refresh токены одноразовые и хранятся в БД
+
+- Отзыв токенов при выходе
+
+- Автоматическая очистка просроченных токенов c помощью node-cron
+
+Пароли:
+
+- Хеширование с помощью bcrypt (10 раундов)
+
+- Сравнение через bcrypt.compare()
+
+ ## Postman коллекция
+Готовая коллекция для Postman находится тут - [Toystore.postman_collection.json](./Postman/Toystore.postman_collection.json)
+
+Переменные окружения:
+
+    {{base_url}} — http://localhost:5000
+
+    {{access_token}} — заполняется автоматически при логине
+
+    {{refresh_token}} — заполняется автоматически при логине
+
+    {{user_email}} — test@mail.ru
+
+    {{user_password}} — 123456
 
 ##  План эндпоинтов
 
 | Метод | Эндпоинт | Описание | Статус |
 | :---: | :--- | :--- | :---: |
+| **ПРОВЕРКА** | | | |
+| GET | `/api/health` | Статус сервера | ✔ |
+| GET | `/api/test-db` | Проверка подключения к бд | ✔ |
 | **БАЗОВЫЕ** | | | |
 | GET | `/api/products` | Все товары | ✔ |
 | GET | `/api/products/:id` | Один товар по ID | ✔ |
@@ -22,11 +89,13 @@
 | **АУТЕНТИФИКАЦИЯ** | | | |
 | POST | `/api/users/register` | Регистрация пользователя | ✔ |
 | POST | `/api/users/login` | Вход (получение токена) | ✔ |
-| GET | `/api/users/profile` | Профиль пользователя (защищенный) | ⚡ |
-| PUT | `/api/users/profile` | Обновление профиля (защищенный) | |
+| GET | `/api/users/profile` | Профиль пользователя (защищенный) | ✔ |
+| PUT | `/api/users/profile` | Обновление профиля (защищенный) | ✔ |
+| POST | `/api/auth/refresh` | Обновление access токена | ✔ |
+| POST | `/api/auth/logout` | Выход | ✔ |
 | | | | |
 | **КОРЗИНА** | | | |
-| GET | `/api/cart` | Получить корзину | |
+| GET | `/api/cart` | Получить корзину | ⚡ |
 | POST | `/api/cart/items` | Добавить товар в корзину | |
 | PUT | `/api/cart/items/:id` | Изменить количество товара | |
 | DELETE | `/api/cart/items/:id` | Удалить товар из корзины | |
