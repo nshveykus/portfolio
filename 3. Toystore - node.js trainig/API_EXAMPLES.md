@@ -640,3 +640,165 @@ json
     "message": "Нет данных для обновления"
 }
 ```
+
+
+## 🛒 Корзина
+
+> **Поддержка:** Авторизованные пользователи (`Authorization: Bearer`) и гости (`X-Session-ID: UUID v4`).
+
+---
+
+### GET /cart
+
+**Запрос (авторизованный):**
+```http
+GET /api/cart
+Authorization: Bearer {{access_token}}
+```
+
+**Запрос (гость):**
+```http
+GET /api/cart
+X-Session-ID: 550e8400-e29b-41d4-a716-446655440000
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "data": [
+        {
+            "id": 1,
+            "product_id": 1,
+            "quantity": 2,
+            "name": "iPhone 15 Pro Max",
+            "price": "120000.00",
+            "image_url": null
+        }
+    ],
+    "count": 1
+}
+```
+
+---
+
+### POST /cart/items
+
+**Запрос:**
+```http
+POST /api/cart/items
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+    "productId": 1,
+    "quantity": 2
+}
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "message": "Товар добавлен в корзину",
+    "data": {
+        "product_id": 1,
+        "quantity": 2
+    }
+}
+```
+
+**Ошибка (400):**
+```json
+{
+    "success": false,
+    "message": "Недостаточно товара на складе. Доступно: 15, запрошено: 100"
+}
+```
+
+---
+
+### PUT /cart/items/:productId
+
+**Запрос:**
+```http
+PUT /api/cart/items/1
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+    "quantity": 5
+}
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "message": "Количество товара изменено",
+    "data": {
+        "product_id": 1,
+        "quantity": 5
+    }
+}
+```
+
+> **При `quantity: 0`** товар автоматически удаляется.
+
+---
+
+### DELETE /cart/items/:productId
+
+**Запрос:**
+```http
+DELETE /api/cart/items/1
+Authorization: Bearer {{access_token}}
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "message": "Товар удален из корзины",
+    "data": {
+        "product_id": 1
+    }
+}
+```
+
+**Ошибка (404):**
+```json
+{
+    "success": false,
+    "message": "Товар не найден в корзине"
+}
+```
+
+---
+
+### DELETE /cart/clear
+
+**Запрос:**
+```http
+DELETE /api/cart/clear
+Authorization: Bearer {{access_token}}
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "message": "Корзина очищена",
+    "data": {
+        "deleted_count": 3
+    }
+}
+```
+
+**Ошибка (404):**
+```json
+{
+    "success": false,
+    "message": "Корзина уже пуста"
+}
+```

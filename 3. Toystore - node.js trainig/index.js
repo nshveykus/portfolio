@@ -2,6 +2,12 @@ const express = require('express');
 const { pool, testConnection } = require('./db');
 require('dotenv').config();
 
+
+const app = express();
+
+// Middleware
+app.use(express.json());
+
 // Запускаем планировщик (если не в тестовом режиме)
 if (process.env.NODE_ENV !== 'test') {
     require('./src/scheduler');
@@ -11,12 +17,11 @@ if (process.env.NODE_ENV !== 'test') {
 const productRoutes = require('./src/routes/product.routes');
 const categoriesRoutes = require('./src/routes/categories.routes');
 const userRoutes = require('./src/routes/user.routes');
+const  cartRoutes = require('./src/routes/cart.routes');
 
-const app = express();
+
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(express.json());
 
 // Проверяем подключение к БД
 testConnection();
@@ -25,6 +30,7 @@ testConnection();
 app.use('/api/products', productRoutes);
 app.use('/api/category', categoriesRoutes);
 app.use('/api/auth', userRoutes);
+app.use('/api/cart', cartRoutes);
 
 // ============= ПРОВЕРОЧНЫЕ МАРШРУТЫ =============
 app.get('/api/health', (req, res) => {
@@ -64,23 +70,23 @@ app.listen(PORT, () => {
     
     console.log(' Проверка:');
     console.log('   GET  /api/health');
-    console.log('   GET  /api/test-db\n');
+    console.log('   GET  /api/test-db');
     
     console.log(' Товары:');
     console.log('   GET  /api/products');
-    console.log('   GET  /api/products/:id\n');
+    console.log('   GET  /api/products/:id');
     
     console.log(' Категории:');
     console.log('   GET  /api/category');
-    console.log('   GET  /api/category/:id\n');
+    console.log('   GET  /api/category/:id');
     
     console.log(' Аутентификация:');
     console.log('   POST /api/auth/register');
     console.log('   POST /api/auth/login');
     console.log('   POST /api/auth/refresh');
     console.log('   POST /api/auth/logout (с токеном)');
-    console.log('   GET  /api/auth/profile (с токеном)\n');
-    console.log('   PUT  /api/auth/profile (с токеном)\n');
-    
+    console.log('   GET  /api/auth/profile (с токеном)');
+    console.log('   PUT  /api/auth/profile (с токеном)');
+    console.log('   GET  /api/cart ');
     console.log('  Для остановки нажмите Ctrl+C');
 });

@@ -71,6 +71,8 @@ POST /api/auth/register
 
     {{user_password}} — 123456
 
+    {{sessionId}} - a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11 (или любой формата UUID)
+
 ##  План эндпоинтов
 
 | Метод | Эндпоинт | Описание | Статус |
@@ -95,14 +97,14 @@ POST /api/auth/register
 | POST | `/api/auth/logout` | Выход | ✔ |
 | | | | |
 | **КОРЗИНА** | | | |
-| GET | `/api/cart` | Получить корзину | ⚡ |
-| POST | `/api/cart/items` | Добавить товар в корзину | |
-| PUT | `/api/cart/items/:id` | Изменить количество товара | |
-| DELETE | `/api/cart/items/:id` | Удалить товар из корзины | |
-| DELETE | `/api/cart/clear` | Очистить корзину | |
+| GET | `/api/cart` | Получить корзину | ✔ |
+| POST | `/api/cart/items` | Добавить товар в корзину | ✔ |
+| PUT | `/api/cart/items/:id` | Изменить количество товара | ✔ |
+| DELETE | `/api/cart/items/:id` | Удалить товар из корзины | ✔ |
+| DELETE | `/api/cart/clear` | Очистить корзину | ✔ |
 | | | | |
 | **ЗАКАЗЫ** | | | |
-| GET | `/api/orders` | Получить список моих заказов | |
+| GET | `/api/orders` | Получить список моих заказов | ⚡ |
 | GET | `/api/orders/:id` | Получить заказ по ID | |
 | POST | `/api/orders` | Создать новый заказ | |
 | PUT | `/api/orders/:id/cancel` | Отменить заказ | |

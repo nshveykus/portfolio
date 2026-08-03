@@ -164,7 +164,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/products?category_id=2&min_price=100000&max_price=200000&sort_by=price&sort_order=DESC",
+              "raw": "{{base_url}}/api/products?on_sale=true",
               "host": [
                 "{{base_url}}"
               ],
@@ -174,24 +174,8 @@
               ],
               "query": [
                 {
-                  "key": "category_id",
-                  "value": "2"
-                },
-                {
-                  "key": "min_price",
-                  "value": "100000"
-                },
-                {
-                  "key": "max_price",
-                  "value": "200000"
-                },
-                {
-                  "key": "sort_by",
-                  "value": "price"
-                },
-                {
-                  "key": "sort_order",
-                  "value": "DESC"
+                  "key": "on_sale",
+                  "value": "true"
                 }
               ]
             }
@@ -693,6 +677,639 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "4.cart",
+      "item": [
+        {
+          "name": "get cart",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const token = pm.collectionVariables.get(\"access_token\");\r",
+                  "if (!token) {\r",
+                  "    console.log(\" Нет access_token! Сначала выполните Login\");\r",
+                  "} else {\r",
+                  "    console.log(\" Access token найден\");\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has success true\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has data array\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.data).to.be.an('array');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has count\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.count).to.be.a('number');\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\" Корзина получена. Товаров:\", pm.response.json().count);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/cart",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cart"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "post addtocart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has success true\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has product data\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.data.product_id).to.be.a('number');\r",
+                  "    pm.expect(response.data.quantity).to.be.a('number');\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\"Товар добавлен в корзину\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"productId\": 1,\r\n    \"quantity\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/cart/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "put cart quantity",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has success true\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Quantity was updated\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.data.quantity).to.be.a('number');\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\"Количество обновлено\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"quantity\": 2\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/cart/items/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "items",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete productfromcart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has success true\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has product id\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.data.product_id).to.be.a('number');\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\"Товар удален из корзины\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/cart/items/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "items",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "add cart outofstock",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has error message\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.false;\r",
+                  "    pm.expect(response.message).to.include('Недостаточно товара');\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\"Ошибка обработана правильно\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"productId\": 1,\r\n    \"quantity\": 999\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/cart/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "clear cart",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/cart/clear",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "clear"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get cart guest",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has success true\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has data array\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.data).to.be.an('array');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has count\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.count).to.be.a('number');\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\" Корзина получена. Товаров:\", pm.response.json().count);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-ID",
+                "value": "{{sessionId}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cart",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cart"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "addtocart guest",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has success true\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has product data\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.data.product_id).to.be.a('number');\r",
+                  "    pm.expect(response.data.quantity).to.be.a('number');\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\"Товар добавлен в корзину\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Session-ID",
+                "value": "{{sessionId}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"productId\": 1,\r\n    \"quantity\": 2\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/cart/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "quantity cart guest",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has success true\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Quantity was updated\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.data.quantity).to.be.a('number');\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\"Количество обновлено\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Session-ID",
+                "value": "{{sessionId}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"quantity\": 2\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/cart/items/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "items",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete productfromcart guest",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has success true\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has product id\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.data.product_id).to.be.a('number');\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\"Товар удален из корзины\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Session-ID",
+                "value": "{{sessionId}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cart/items/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "items",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "clear cart guest",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Session-ID",
+                "value": "{{sessionId}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cart/clear",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "clear"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "auth": {
@@ -729,11 +1346,11 @@
     },
     {
       "key": "access_token",
-      "value": ""
+      "secret": true
     },
     {
       "key": "refresh_token",
-      "value": ""
+      "secret": true
     },
     {
       "key": "user_email",
@@ -741,6 +1358,10 @@
     },
     {
       "key": "user_password",
+      "value": ""
+    },
+    {
+      "key": "sessionId",
       "value": ""
     }
   ]
