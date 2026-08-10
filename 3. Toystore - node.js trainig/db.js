@@ -1,7 +1,7 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// Создаем пул соединений - это как несколько телефонов для общения с БД
+// Создаем пул соединений
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,

@@ -79,5 +79,17 @@ class CartModel {
         const [result] = await pool.execute(query, [userId, sessionId]);
         return result;
     }
+
+// Удалить старые гостевые таблицы
+static async deleteOldCarts(days=30){
+const result = await pool.execute(
+    `delete from carts
+    where user_id is null
+    and updated_at < date_sub(now(), interval ? day)`,
+    [days]);
+    console.log(`Удалено ${result.affectedRows} старых гостевых корзин`);
+    return result.affectedRows;
+}
+
 }
 module.exports = CartModel;

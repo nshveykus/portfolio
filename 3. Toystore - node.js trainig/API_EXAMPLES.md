@@ -9,6 +9,7 @@
 - [Категории](#категории)
 - [Аутентификация](#аутентификация)
 - [Профиль пользователя](#профиль-пользователя)
+- [Корзина](#корзина)
 
 ## Проверка
 
@@ -642,7 +643,7 @@ json
 ```
 
 
-## 🛒 Корзина
+## Корзина
 
 > **Поддержка:** Авторизованные пользователи (`Authorization: Bearer`) и гости (`X-Session-ID: UUID v4`).
 
@@ -800,5 +801,202 @@ Authorization: Bearer {{access_token}}
 {
     "success": false,
     "message": "Корзина уже пуста"
+}
+```
+## Заказы
+
+Особенности:
+
+    Только для авторизованных пользователей
+
+    Создаётся на основе корзины
+
+    Автоматическая проверка остатков
+
+    Автоматическая очистка корзины после заказа
+
+### GET /orders
+
+Получение списка всех заказов пользователя.
+
+Запрос:
+```http
+
+GET http://localhost:5000/api/orders
+Authorization: Bearer {{access_token}}
+```
+
+Ответ (200 OK):
+```json
+
+{
+    "success": true,
+    "data": [
+        {
+            "id": 1,
+            "order_date": "2026-06-22T09:12:15.000Z",
+            "total_amount": "155000.00",
+            "is_paid": true,
+            "delivery_address": "г. Москва, ул. Тверская, д. 5, кв. 12",
+            "delivery_date": "2026-06-25",
+            "comment": "Позвонить за час",
+            "status": {
+                "id": 2,
+                "name": "unpaid"
+            },
+            "payment_method": {
+                "id": 1,
+                "name": "card"
+            },
+            "items": [
+                {
+                    "product_id": 1,
+                    "name": "iPhone 15 Pro Max",
+                    "quantity": 1,
+                    "price": "120000.00",
+                    "total": "120000.00",
+                    "image_url": null
+                },
+                {
+                    "product_id": 19,
+                    "name": "Наушники Sony WH-1000XM5",
+                    "quantity": 1,
+                    "price": "30000.00",
+                    "total": "30000.00",
+                    "image_url": null
+                }
+            ]
+        }
+    ],
+    "count": 1
+}
+```
+GET /orders/:id
+
+Получение конкретного заказа по ID.
+
+Запрос:
+```http
+
+GET http://localhost:5000/api/orders/1
+Authorization: Bearer {{access_token}}
+```
+Ответ (200 OK):
+```json
+
+{
+    "success": true,
+    "data": {
+        "id": 1,
+        "order_date": "2026-06-22T09:12:15.000Z",
+        "total_amount": "155000.00",
+        "is_paid": true,
+        "delivery_address": "г. Москва, ул. Тверская, д. 5, кв. 12",
+        "delivery_date": "2026-06-25",
+        "comment": "Позвонить за час",
+        "status": {
+            "id": 2,
+            "name": "unpaid"
+        },
+        "payment_method": {
+            "id": 1,
+            "name": "card"
+        },
+        "items": [
+            {
+                "product_id": 1,
+                "name": "iPhone 15 Pro Max",
+                "quantity": 1,
+                "price": "120000.00",
+                "total": "120000.00",
+                "image_url": null
+            }
+        ]
+    }
+}
+```
+Ошибка (404 Not Found):
+```json
+
+{
+    "success": false,
+    "message": "Заказ не найден"
+}
+```
+POST /orders
+
+Создание нового заказа из корзины.
+
+Запрос:
+```http
+
+POST http://localhost:5000/api/orders
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+    "payment_method_id": 1,
+    "delivery_address": "г. Москва, ул. Тверская, д. 5, кв. 12",
+    "delivery_date": "2026-08-15",
+    "comment": "Позвонить за час"
+}
+```
+Ответ (201 Created):
+```json
+
+{
+    "success": true,
+    "message": "Заказ успешно создан",
+    "data": {
+        "id": 16,
+        "order_date": "2026-08-10T10:30:00.000Z",
+        "total_amount": "150000.00",
+        "is_paid": false,
+        "delivery_address": "г. Москва, ул. Тверская, д. 5, кв. 12",
+        "delivery_date": "2026-08-15",
+        "comment": "Позвонить за час",
+        "status": {
+            "id": 1,
+            "name": "new"
+        },
+        "payment_method": {
+            "id": 1,
+            "name": "card"
+        },
+        "items": [
+            {
+                "product_id": 1,
+                "name": "iPhone 15 Pro Max",
+                "quantity": 1,
+                "price": "120000.00",
+                "total": "120000.00",
+                "image_url": null
+            }
+        ]
+    }
+}
+```
+Ошибка (корзина пуста, 400 Bad Request):
+```json
+
+{
+    "success": false,
+    "message": "Корзина пуста"
+}
+```
+Ошибка (недостаточно товара, 400 Bad Request):
+```json
+
+{
+    "success": false,
+    "message": "Недостаточно товара: iPhone 15 Pro Max. Доступно: 15"
+}
+```
+Ошибка (нет обязательных полей, 400 Bad Request):
+```json
+
+{
+    "success": false,
+    "message": "Не указан способ оплаты или адрес доставки"
 }
 ```

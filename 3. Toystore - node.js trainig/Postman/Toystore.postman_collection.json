@@ -395,7 +395,13 @@
               "type": "noauth"
             },
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "X-Session-ID",
+                "value": "{{sessionId}}",
+                "type": "text"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"email\": \"{{user_email}}\",\r\n    \"password\": \"{{user_password}}\"\r\n}",
@@ -1139,7 +1145,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"productId\": 1,\r\n    \"quantity\": 2\r\n}",
+              "raw": "{\r\n    \"productId\": 1,\r\n    \"quantity\": 1\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1283,6 +1289,27 @@
         },
         {
           "name": "clear cart guest",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has success true\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "noauth"
@@ -1304,6 +1331,610 @@
                 "api",
                 "cart",
                 "clear"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5.orders",
+      "item": [
+        {
+          "name": "getall orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has success true\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has data array\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.data).to.be.an('array');\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "console.log(\" Заказы получены\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get orders by id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has success true\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "console.log(\" Заказ получен\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/orders/59",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "59"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "post new order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has success true\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\"Заказ создан\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.sendRequest({\r",
+                  "    url: pm.collectionVariables.get(\"base_url\") + \"/api/cart/items\",\r",
+                  "    method: \"POST\",\r",
+                  "    header: {\r",
+                  "        Authorization: \"Bearer \" + pm.collectionVariables.get(\"access_token\"),\r",
+                  "        \"Content-Type\": \"application/json\"\r",
+                  "    },\r",
+                  "    body: {\r",
+                  "        mode: \"raw\",\r",
+                  "        raw: JSON.stringify({\r",
+                  "            productId: 1,\r",
+                  "            quantity: 1\r",
+                  "        })\r",
+                  "    }\r",
+                  "}, function (err, res) {\r",
+                  "    console.log(\"В корзину добавлена одна позиция для теста\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"payment_method_id\": \"1\",\r\n    \"delivery_address\": \"Москва, улица тестовая, дом 13, квартира 37\",\r\n    \"delivery_date\": \"2026-06-24\",\r\n    \"comment\": \"Тестим тестим!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/orders/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get orders noauth",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has error message\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.false;\r",
+                  "    pm.expect(response.message).to.include('Требуется авторизация');\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get order nonexist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has error message\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.false;\r",
+                  "    pm.expect(response.message).to.include('Заказ не найден');\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/orders/9999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "9999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get order another users order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has error message\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.false;\r",
+                  "    pm.expect(response.message).to.include('Заказ не найден');\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/orders/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "post orders empty cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has error message\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.false;\r",
+                  "    pm.expect(response.message).to.include('Корзина пуста');\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.sendRequest({\r",
+                  "    url: pm.collectionVariables.get(\"base_url\") + '/api/cart/clear',\r",
+                  "    method: 'DELETE',\r",
+                  "    header: {\r",
+                  "        'Authorization': 'Bearer ' + pm.collectionVariables.get(\"access_token\")\r",
+                  "    }\r",
+                  "}, function (err, res) {\r",
+                  "    console.log(\"Корзина очищена для теста\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"payment_method_id\": \"1\",\r\n    \"delivery_address\": \"Москва, улица тестовая, дом 13, квартира 37\",\r\n    \"delivery_date\": \"2026-06-24\",\r\n    \"comment\": \"Тестим тестим!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/orders/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "post order missing fields",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has error message\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.false;\r",
+                  "    pm.expect(response.message).to.include('Не указан способ оплаты или адрес доставки');\r",
+                  "});\r",
+                  "pm.sendRequest({\r",
+                  "    url: pm.collectionVariables.get(\"base_url\") + '/api/cart/clear',\r",
+                  "    method: 'DELETE',\r",
+                  "    header: {\r",
+                  "        'Authorization': 'Bearer ' + pm.collectionVariables.get(\"access_token\")\r",
+                  "    }\r",
+                  "}, function (err, res) {\r",
+                  "    console.log(\"Корзина очищена после теста\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.sendRequest({\r",
+                  "    url: pm.collectionVariables.get(\"base_url\") + \"/api/cart/items\",\r",
+                  "    method: \"POST\",\r",
+                  "    header: {\r",
+                  "        Authorization: \"Bearer \" + pm.collectionVariables.get(\"access_token\"),\r",
+                  "        \"Content-Type\": \"application/json\"\r",
+                  "    },\r",
+                  "    body: {\r",
+                  "        mode: \"raw\",\r",
+                  "        raw: JSON.stringify({\r",
+                  "            productId: 1,\r",
+                  "            quantity: 1\r",
+                  "        })\r",
+                  "    }\r",
+                  "}, function (err, res) {\r",
+                  "    console.log(\"В корзину добавлена одна позиция для теста\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"comment\": \"Без даты и адреса доставки\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/orders/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "post orders noauth",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has error message\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.false;\r",
+                  "    pm.expect(response.message).to.include('Требуется авторизация');\r",
+                  "});\r",
+                  "\r",
+                  "pm.sendRequest({\r",
+                  "    url: pm.collectionVariables.get(\"base_url\") + '/api/cart/clear',\r",
+                  "    method: 'DELETE',\r",
+                  "    header: {\r",
+                  "        'Authorization': 'Bearer ' + pm.collectionVariables.get(\"access_token\")\r",
+                  "    }\r",
+                  "}, function (err, res) {\r",
+                  "    console.log(\"Корзина очищена после теста\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.sendRequest({\r",
+                  "    url: pm.collectionVariables.get(\"base_url\") + \"/api/cart/items\",\r",
+                  "    method: \"POST\",\r",
+                  "    header: {\r",
+                  "        Authorization: \"Bearer \" + pm.collectionVariables.get(\"access_token\"),\r",
+                  "        \"Content-Type\": \"application/json\"\r",
+                  "    },\r",
+                  "    body: {\r",
+                  "        mode: \"raw\",\r",
+                  "        raw: JSON.stringify({\r",
+                  "            productId: 1,\r",
+                  "            quantity: 1\r",
+                  "        })\r",
+                  "    }\r",
+                  "}, function (err, res) {\r",
+                  "    console.log(\"В корзину добавлена одна позиция для теста\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"payment_method_id\": \"1\",\r\n    \"delivery_address\": \"Москва, улица тестовая, дом 13, квартира 37\",\r\n    \"delivery_date\": \"2026-06-24\",\r\n    \"comment\": \"Тестим тестим!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/orders/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                ""
               ]
             }
           },

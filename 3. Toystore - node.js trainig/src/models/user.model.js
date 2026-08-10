@@ -79,6 +79,45 @@ class User {
         // Возвращаем обновленного пользователя
         return this.findById(id);
     }
+    
+    
+    // Перенос корзины с гостевой в авторизованую
+    static async transferGuestCart(userId, sessionId) {
+    if (!sessionId) return null;
+    
+    // Проверяем, есть ли у пользователя корзина
+    const [userCart] = await pool.execute(
+        'SELECT id FROM carts WHERE user_id = ? LIMIT 1',
+        [userId]
+    );
+    
+    // Если у пользователя уже есть корзина — не переносим
+    if (userCart.length > 0) {
+        console.log('У пользователя уже есть корзина, пропускаем перенос');
+        return null;
+    }
+    
+    // Проверяем, есть ли товары в гостевой корзине
+    const [guestCart] = await pool.execute(
+        'SELECT id FROM carts WHERE session_id = ? LIMIT 1',
+        [sessionId]
+    );
+    
+    if (guestCart.length === 0) {
+        console.log('ℹ️ Гостевая корзина пуста');
+        return null;
+    }
+    
+    // Переносим корзину
+    const [result] = await pool.execute(
+        'UPDATE carts SET user_id = ?, session_id = NULL WHERE session_id = ?',
+        [userId, sessionId]
+    );
+    
+    console.log(`Перенесено ${result.affectedRows} товаров из гостевой корзины`);
+    return result;
+}
+
 }
 
 module.exports = User;

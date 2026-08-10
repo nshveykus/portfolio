@@ -35,7 +35,7 @@ const register = async (req, res) => {
     try {
         // 1. Получаем данные из тела запроса
         const { email, password, first_name, last_name, phone, birth_date } = req.body;
-        
+        const sessionId = req.headers['x-session-id'];
         // 2. Проверяем, что все обязательные поля заполнены
         if (!email || !password || !first_name || !last_name) {
             return res.status(400).json({
@@ -67,7 +67,8 @@ const register = async (req, res) => {
         const { accessToken, refreshToken } = generateTokens(newUser);
         // Сохраняем refresh token в БД
         await RefreshToken.save(newUser.id, refreshToken);
-        
+        // Переносим корзину из гостевых в авторизованые
+        await User.transferGuestCart(newUser.id, sessionId);
         // 6. Отправляем ответ
         res.status(201).json({
             success: true,
@@ -82,6 +83,7 @@ const register = async (req, res) => {
                 }
             }
         });
+        
         
     } catch (error) {
         console.error('Ошибка в register:', error);
@@ -99,7 +101,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        
+        const sessionId = req.headers['x-session-id'];
         // Находим пользователя
         const user = await User.findByEmail(email);
         if (!user) {
@@ -127,8 +129,9 @@ const login = async (req, res) => {
         
         // Генерируем токен
         const { accessToken, refreshToken } = generateTokens(user);
-        await RefreshToken.save(user.id, refreshToken);    
-
+        await RefreshToken.save(user.id, refreshToken);
+        // Если нет авторизованой корзины, делаем гостевую авторизованой
+        await User.transferGuestCart(user.id, sessionId);
 
 
         res.json({

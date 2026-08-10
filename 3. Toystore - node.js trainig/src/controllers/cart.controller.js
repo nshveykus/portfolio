@@ -3,7 +3,9 @@ require('dotenv').config();
 // Получение корзины
 const getCart = async (req, res) => {
     try {
-        const cart = await CartModel.getCart(req.user_id, req.session_id)
+        const userId = req.user ? req.user.id : null;
+        const sessionId = req.session_id;
+        const cart = await CartModel.getCart(userId, sessionId)
         res.json({
         success: true,
         data: cart,
@@ -22,14 +24,16 @@ const getCart = async (req, res) => {
 const addItem = async (req, res) => {
     try {
         const {productId, quantity} = req.body;
-        console.log(req.body)
+
         if (!productId || !quantity || quantity < 1) {
             return res.status(400).json({
                 success: false,
                 message: 'Не указан товар или правильное количество'
             });
         }
-        const cart = await CartModel.addItem(req.user_id, req.session_id, productId, quantity)
+        const userId = req.user ? req.user.id : null;
+        const sessionId = req.session_id;
+        const cart = await CartModel.addItem(userId, sessionId, productId, quantity)
     res.json({
     success: true,
     message: 'Товар добавлен в корзину',
@@ -66,6 +70,8 @@ const updateQuantity = async (req, res) => {
     try {
         const { productId } = req.params;
         const { quantity } = req.body;
+        const userId = req.user ? req.user.id : null;
+        const sessionId = req.session_id;
         if (!productId || !quantity|| quantity < 0) {
             return res.status(400).json({
                 success: false,
@@ -73,14 +79,14 @@ const updateQuantity = async (req, res) => {
             });
         }
         if (quantity === 0){
-            await CartModel.deleteProduct(req.user_id, productId, req.session_id);
+            await CartModel.deleteProduct(userId, productId, sessionId);
              return res.json({
                 success: true,
                 message: 'Товар удален из корзины',
                 data: { product_id: productId }
             });
         }
-    await CartModel.updateQuantity(req.user_id, req.session_id, productId, quantity)
+    await CartModel.updateQuantity(userId, sessionId, productId, quantity)
     res.json({
     success: true,
     message: 'Количество товара изменено',
@@ -116,6 +122,8 @@ console.error('Ошибка изменения количества товара
 const deleteProduct = async (req, res) => {
 
         try {
+        const userId = req.user ? req.user.id : null;
+        const sessionId = req.session_id;
         const {productId} = req.params;
         if (!productId) {
             return res.status(400).json({
@@ -123,7 +131,7 @@ const deleteProduct = async (req, res) => {
                 message: 'Неправильный id товара для удаления'
             });
         }
-    const result = await CartModel.deleteProduct(req.user_id, productId, req.session_id)
+    const result = await CartModel.deleteProduct(userId, productId, sessionId)
             if (result.affectedRows === 0) {
             return res.status(404).json({
                 success: false,
@@ -151,7 +159,9 @@ const deleteProduct = async (req, res) => {
 // очистить корзину
 const deleteCart = async (req, res) => {
         try {
-    const result = await CartModel.deleteCart(req.user_id, req.session_id)
+        const userId = req.user ? req.user.id : null;
+        const sessionId = req.session_id;
+    const result = await CartModel.deleteCart(userId, sessionId)
             if (result.affectedRows === 0) {
             return res.status(404).json({
                 success: false,

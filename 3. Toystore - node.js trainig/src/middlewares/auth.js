@@ -56,8 +56,12 @@ const identifyCartOwner = (req, res, next) => {
         const token = authHeader.split(' ')[1];
         try {
             const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-            req.user_id = decoded.id; // Передаем ID пользователя
-            req.session_id = null;    // Сессия не нужна, приоритет у юзера
+            req.user = {
+                id: decoded.id,
+                email: decoded.email,
+                is_admin: decoded.is_admin
+            };
+            req.session_id = null;
             req.cart_owner_type = 'user';
             return next();
         } catch (error) {
@@ -80,7 +84,7 @@ const identifyCartOwner = (req, res, next) => {
                 message: 'Неверный формат ID сессии. Ожидается UUID v4.'
             });
         }
-        req.user_id = null;
+        req.user = null;
         req.session_id = sessionId; // Передаем ID сессии гостя
         req.cart_owner_type = 'guest'
         return next();
