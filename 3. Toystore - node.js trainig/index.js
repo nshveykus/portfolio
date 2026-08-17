@@ -19,6 +19,8 @@ const categoriesRoutes = require('./src/routes/categories.routes');
 const userRoutes = require('./src/routes/user.routes');
 const  cartRoutes = require('./src/routes/cart.routes');
 const ordersRoutes = require('./src/routes/orders.routes');
+const reviewRoutes = require('./src/routes/review.routes');
+const adminRoutes = require('./src/routes/admin.routes');
 
 const PORT = process.env.PORT || 5000;
 
@@ -32,6 +34,8 @@ app.use('/api/category', categoriesRoutes);
 app.use('/api/auth', userRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', ordersRoutes);
+app.use('/api', reviewRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ============= ПРОВЕРОЧНЫЕ МАРШРУТЫ =============
 app.get('/api/health', (req, res) => {

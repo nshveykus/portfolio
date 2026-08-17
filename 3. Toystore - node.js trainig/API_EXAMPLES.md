@@ -10,6 +10,7 @@
 - [Аутентификация](#аутентификация)
 - [Профиль пользователя](#профиль-пользователя)
 - [Корзина](#корзина)
+- [Отзывы](#отзывы)
 
 ## Проверка
 
@@ -1000,3 +1001,505 @@ Content-Type: application/json
     "message": "Не указан способ оплаты или адрес доставки"
 }
 ```
+
+---
+##  Отзывы
+
+**Особенности:**
+- Только для авторизованных пользователей
+- Один отзыв на товар от одного пользователя
+- При обновлении или удалении используется `product_id` (не `review_id`)
+
+---
+
+### GET /products/:id/reviews
+
+Получение всех отзывов на товар.
+
+**Запрос:**
+```http
+GET http://localhost:5000/api/products/1/reviews
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "data": [
+        {
+            "id": 1,
+            "rating": 5,
+            "first_name": "Иван",
+            "last_name": "Петров",
+            "comment": "Отличный товар! Очень доволен покупкой.",
+            "created_at": "2026-06-22T09:12:49.000Z"
+        },
+        {
+            "id": 2,
+            "rating": 4,
+            "first_name": "Мария",
+            "last_name": "Иванова",
+            "comment": "Хороший телефон, но дороговато",
+            "created_at": "2026-06-22T09:12:49.000Z"
+        }
+    ],
+    "count": 2
+}
+```
+
+**Ответ (пустой):**
+```json
+{
+    "success": true,
+    "data": [],
+    "count": 0
+}
+```
+
+---
+
+### POST /reviews
+
+Оставить отзыв на товар.
+
+**Запрос:**
+```http
+POST http://localhost:5000/api/reviews
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+    "product_id": 1,
+    "rating": 5,
+    "comment": "Отличный товар! Рекомендую."
+}
+```
+
+**Ответ (201 Created):**
+```json
+{
+    "success": true,
+    "message": "Отзыв успешно оставлен"
+}
+```
+
+**Ошибка (409 Conflict) — уже есть отзыв:**
+```json
+{
+    "success": false,
+    "message": "Вы уже оставили отзыв на этот товар"
+}
+```
+
+**Ошибка (400 Bad Request) — нет обязательных полей:**
+```json
+{
+    "success": false,
+    "message": "Некорректные данные: product_id и rating обязательны"
+}
+```
+
+**Ошибка (400 Bad Request) — неверный рейтинг:**
+```json
+{
+    "success": false,
+    "message": "Рейтинг должен быть от 1 до 5"
+}
+```
+
+---
+
+### PUT /reviews
+
+Обновить существующий отзыв на товар.
+
+**Запрос:**
+```http
+PUT http://localhost:5000/api/reviews
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+    "product_id": 1,
+    "rating": 4,
+    "comment": "Обновленный отзыв: товар хороший, но доставка задержалась."
+}
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "message": "Отзыв успешно обновлен"
+}
+```
+
+**Ошибка (404 Not Found):**
+```json
+{
+    "success": false,
+    "message": "Отзыв не найден"
+}
+```
+
+---
+
+### DELETE /reviews/:product_id
+
+Удалить свой отзыв на товар.
+
+**Запрос:**
+```http
+DELETE http://localhost:5000/api/reviews/1
+Authorization: Bearer {{access_token}}
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "message": "Отзыв успешно удален"
+}
+```
+
+**Ошибка (404 Not Found):**
+```json
+{
+    "success": false,
+    "message": "Отзыв не найден"
+}
+```
+
+**Ошибка (401 Unauthorized):**
+```json
+{
+    "success": false,
+    "message": "Требуется авторизация"
+}
+```
+
+---
+
+## Админ-панель
+
+**Особенности:**
+- Только для пользователей с правами администратора (`is_admin = 1`)
+- Требуется `Authorization: Bearer {{admin_access_token}}`
+- Все изменения проходят проверку прав через middleware `isAdmin`
+
+---
+
+### POST /admin/products
+
+Создание нового товара.
+
+**Запрос:**
+```http
+POST http://localhost:5000/api/admin/products
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+    "name": "Игровая приставка PlayStation 5",
+    "description": "Новейшая игровая приставка с поддержкой 4K и SSD",
+    "price": 45000.00,
+    "quantity": 10,
+    "category_id": 1,
+    "brand": "Sony",
+    "sku": "PS5-001",
+    "image_url": "https://example.com/ps5.jpg",
+    "attributes": {
+        "color": "white",
+        "weight": "3.2kg",
+        "warranty": "12 months"
+    }
+}
+```
+
+**Ответ (201 Created):**
+```json
+{
+    "success": true,
+    "message": "Новый товар создан",
+    "id": 21
+}
+```
+
+**Ошибка (409 Conflict) — дубликат SKU:**
+```json
+{
+    "success": false,
+    "message": "Товар с таким SKU уже существует"
+}
+```
+
+**Ошибка (400 Bad Request) — отсутствуют обязательные поля:**
+```json
+{
+    "success": false,
+    "message": "Некорректные данные. Поля name, description, price, quantity — обязательные"
+}
+```
+
+---
+
+### PUT /admin/products/:id
+
+Обновление существующего товара.
+
+**Запрос:**
+```http
+PUT http://localhost:5000/api/admin/products/21
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+    "name": "PlayStation 5 Digital Edition",
+    "description": "Цифровая версия без дисковода",
+    "price": 40000.00,
+    "quantity": 5,
+    "category_id": 1,
+    "brand": "Sony",
+    "sku": "PS5-DIGITAL-001"
+}
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "message": "Продукт обновлен"
+}
+```
+
+**Ошибка (404 Not Found):**
+```json
+{
+    "success": false,
+    "message": "Товар не найден"
+}
+```
+
+**Ошибка (409 Conflict) — дубликат SKU:**
+```json
+{
+    "success": false,
+    "message": "Товар с таким SKU уже существует"
+}
+```
+
+---
+
+### DELETE /admin/products/:id
+
+Деактивация товара (soft delete). Товар становится неактивным и не отображается в общем списке.
+
+**Запрос:**
+```http
+DELETE http://localhost:5000/api/admin/products/21
+Authorization: Bearer {{access_token}}
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "message": "Продукт удален"
+}
+```
+
+**Ошибка (404 Not Found):**
+```json
+{
+    "success": false,
+    "message": "Товар не найден"
+}
+```
+
+**Ошибка (409 Conflict) — товар уже деактивирован:**
+```json
+{
+    "success": false,
+    "message": "Товар уже деактивирован"
+}
+```
+
+---
+
+### PUT /admin/orders/:orderId/status
+
+Изменение статуса заказа.
+
+**Статусы заказов:**
+
+| ID | Название | Описание |
+|----|----------|----------|
+| 1 | `new` | Заказ создан |
+| 2 | `unpaid` | Ожидает оплаты |
+| 3 | `processing` | В обработке |
+| 4 | `shipped` | В доставке |
+| 5 | `delivered` | Доставлен |
+| 6 | `cancelled` | Заказ отменен |
+
+**Запрос:**
+```http
+PUT http://localhost:5000/api/admin/orders/1/status
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+    "status_id": 4
+}
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "message": "Статус заказа изменен"
+}
+```
+
+**Ошибка (404 Not Found):**
+```json
+{
+    "success": false,
+    "message": "Заказ не найден"
+}
+```
+
+**Ошибка (400 Bad Request) — неверный статус:**
+```json
+{
+    "success": false,
+    "message": "Некорректные данные. ID статуса от 1 до 6"
+}
+```
+
+---
+
+### GET /admin/analytics/summary
+
+Детальная статистика продаж по дням.
+
+**Параметры запроса:**
+
+| Параметр | Тип | Описание | Пример |
+|----------|-----|----------|--------|
+| `start_date` | string | Начало периода (YYYY-MM-DD) | `2026-08-01` |
+| `end_date` | string | Конец периода (YYYY-MM-DD) | `2026-08-10` |
+
+**Запрос:**
+```http
+GET http://localhost:5000/api/admin/analytics/summary?start_date=2026-08-01&end_date=2026-08-10
+Authorization: Bearer {{access_token}}
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "data": [
+        {
+            "report_date": "2026-08-10",
+            "total_orders": 15,
+            "total_revenue": "85000.00",
+            "avg_order_value": "5666.67",
+            "unique_users": 12
+        },
+        {
+            "report_date": "2026-08-09",
+            "total_orders": 12,
+            "total_revenue": "72000.00",
+            "avg_order_value": "6000.00",
+            "unique_users": 10
+        }
+    ],
+    "count": 2,
+    "period": {
+        "start_date": "2026-08-01",
+        "end_date": "2026-08-10"
+    }
+}
+```
+
+**Запрос без дат (все данные):**
+```http
+GET http://localhost:5000/api/admin/analytics/summary
+Authorization: Bearer {{access_token}}
+```
+
+---
+
+### GET /admin/analytics/totals
+
+Итоговая статистика продаж за период.
+
+**Параметры запроса:**
+
+| Параметр | Тип | Описание | Пример |
+|----------|-----|----------|--------|
+| `start_date` | string | Начало периода | `2026-08-01` |
+| `end_date` | string | Конец периода | `2026-08-10` |
+
+**Запрос:**
+```http
+GET http://localhost:5000/api/admin/analytics/totals?start_date=2026-08-01&end_date=2026-08-10
+Authorization: Bearer {{access_token}}
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "data": {
+        "days_count": 30,
+        "total_orders": 450,
+        "total_revenue": "1250000.00",
+        "avg_order_value": "2777.78",
+        "max_unique_users": 45,
+        "min_daily_revenue": "5000.00",
+        "max_daily_revenue": "85000.00"
+    },
+    "period": {
+        "start_date": "2026-08-01",
+        "end_date": "2026-08-10"
+    }
+}
+```
+
+---
+
+### GET /admin/analytics/lastday
+
+Статистика за последний день (самый свежий день в таблице).
+
+**Запрос:**
+```http
+GET http://localhost:5000/api/admin/analytics/lastday
+Authorization: Bearer {{access_token}}
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "data": {
+        "report_date": "2026-08-15",
+        "total_orders": 18,
+        "total_revenue": "95000.00",
+        "avg_order_value": "5277.78",
+        "unique_users": 14
+    }
+}
+```
+
+**Ошибка (404 Not Found):**
+```json
+{
+    "success": false,
+    "message": "Данные статистики не найдены"
+}
+```
+
+---
