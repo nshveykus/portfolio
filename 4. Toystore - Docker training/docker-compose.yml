@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: toystore-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_NAME=${DB_NAME:-toystore}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET:-access_secret}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-refresh_secret}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - toystore-network
+
+  mysql:
+    image: mysql:8
+    container_name: toystore-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-123456}
+      - MYSQL_DATABASE=${DB_NAME:-toystore}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/toystore_backup.sql:/docker-entrypoint-initdb.d/dump.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-123456}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - toystore-network
+  redis:
+    image: redis:alpine
+    container_name: toystore-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - toystore-network
+    profiles:
+      - with-redis
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  toystore-network:
+    driver: bridge

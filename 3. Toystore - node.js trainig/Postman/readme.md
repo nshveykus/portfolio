@@ -28,10 +28,10 @@
 
 ---
 Прогон всех тестов  
-![Postman Runner Result](/runner.png)  
+![Postman Runner Result](../Postman/runner.png)  
 Пример позитивного теста  
-![Postman Test Success](/tests.png)  
+![Postman Test Success](../Postman/tests.png)  
 Пример негативного теста  
-![Postman Test negative](/negative%20test.png)  
+![Postman Test negative](../Postman/negative%20test.png)  
 
 
