@@ -5,6 +5,13 @@
 
 Этот проект — продолжение [предыдущего этапа](../3.%20Toystore%20-%20node.js%20trainig/), где я перенес готовый бэкенд в Docker-контейнеры.
 
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-18.x-339933?logo=node.js&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.x-4479A1?logo=mysql&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4.18.x-000000?logo=express&logoColor=white)
+![Swagger](https://img.shields.io/badge/Swagger-85EA2D?logo=swagger&logoColor=black)
+![Raspberry Pi](https://img.shields.io/badge/RPi-A22846?logo=raspberry-pi&logoColor=white)
+
 ---
 
 ## Оглавление
@@ -138,8 +145,9 @@ docker-compose up -d --build
 | **Платформа** | Raspberry Pi 4 |
 | **ОС** | Raspberry Pi OS (64-bit) |
 | **Docker** | Docker CE |
-
 | **Порты** | 5000 (API), 3306 (MySQL) |
+
+![скриншот пи с контейнерами в vscode](./pi-deploy.png)
 
 ## Что я освоил
 
