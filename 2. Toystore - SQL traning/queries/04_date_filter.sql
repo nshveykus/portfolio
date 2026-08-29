@@ -1,3 +1,0 @@
-SELECT * 
-FROM orders
-WHERE order_date BETWEEN '2026-06-16 00:00:00' AND '2026-06-22 23:59:59';
