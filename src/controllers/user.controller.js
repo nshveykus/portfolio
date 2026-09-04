@@ -177,23 +177,12 @@ const refreshToken = async (req, res) => {
     // #swagger.summary = обновление токена
     try {
         const { refresh_token } = req.body;
-
         if (!refresh_token) {
             return res.status(400).json({
                 success: false,
                 message: 'Refresh token обязателен'
             });
         }
-
-        // Проверяем в БД
-        const storedToken = await RefreshToken.findByToken(refresh_token);
-        if (!storedToken) {
-            return res.status(401).json({
-                success: false,
-                message: 'Недействительный или отозванный refresh token'
-            });
-        }
-
         // Проверяем JWT
         let decoded;
         try {
@@ -203,6 +192,15 @@ const refreshToken = async (req, res) => {
             return res.status(401).json({
                 success: false,
                 message: 'Недействительный refresh token'
+            });
+        }
+
+        // Проверяем в БД
+        const isValid = await RefreshToken.isValidForUser(decoded.id, refresh_token);
+        if (!isValid) {
+            return res.status(401).json({
+                success: false,
+                message: 'Недействительный или отозванный refresh token'
             });
         }
 

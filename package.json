@@ -7,7 +7,6 @@
     "start": "node index.js",
     "swagger": "node ./swagger.js",
     "dev": "npm run swagger && nodemon index.js"
-
   },
   "keywords": [
     "api",
@@ -23,6 +22,7 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "helmet": "^7.0.0",
+    "ioredis": "^5.11.1",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.0",
     "mysql2": "^3.6.0",

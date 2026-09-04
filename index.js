@@ -12,11 +12,15 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Middleware
 app.use(express.json());
+// Применяем рейтлимитер ко всем маршрутам, начинающимся с /api
+const rateLimit = require('./src/middlewares/rateLimit');
 
+app.use('/api', rateLimit(100, 60));
 // Запускаем планировщик (если не в тестовом режиме)
 if (process.env.NODE_ENV !== 'test') {
     require('./src/scheduler');
 }
+
 
 // Импортируем маршруты
 const productRoutes = require('./src/routes/product.routes');
