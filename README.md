@@ -2,7 +2,22 @@
 Я Никита, и это мое портфолио на гитхабе.  
 
 
-Тут я выкладываю учебные проекты, которые дадут вам понять, какими навыками я обладаю.
+Тут я выкладываю учебные проекты, которые дадут вам понять, какими навыками я обладаю.  
+
+За время работы над проектами я освоил полный цикл разработки бэкенда — от проектирования реляционных баз данных до контейнеризации и деплоя. В моём стеке: **Node.js (Express)**, **MySQL** (проектирование схем, сложные запросы, оконные функции), **Redis** (кеширование, rate limiting, гибридное хранение токенов с fallback-механизмом), **Docker** и **Docker Compose** (многоэтапная сборка, оркестрация, деплой). Также активно использую **Postman** для тестирования API, **Swagger** для документации, **JWT** для аутентификации, **Git** и **GitHub** для контроля версий.
+
+### Технологический стек
+![Node.js](https://img.shields.io/badge/Node.js-22.x-339933?logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4.18.x-000000?logo=express&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.x-4479A1?logo=mysql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-7.x-DC382D?logo=redis&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+![Raspberry Pi](https://img.shields.io/badge/RPi-A22846?logo=raspberry-pi&logoColor=white)
+![Postman](https://img.shields.io/badge/Postman-FF6C37?logo=postman&logoColor=white)
+![Swagger](https://img.shields.io/badge/Swagger-85EA2D?logo=swagger&logoColor=black)
+![JWT](https://img.shields.io/badge/JWT-000000?logo=jsonwebtokens&logoColor=white)
+![Git](https://img.shields.io/badge/Git-F05032?logo=git&logoColor=white)
+
 # Проекты
 ## [1. API testing store](1.%20API%20testing%20store/)
 Цель проекта:  
@@ -57,7 +72,7 @@
 
 Я взял бэкенд из предыдущего проекта, завернул его в Docker-контейнеры и настроил оркестрацию через Docker Compose. В итоге проект поднимается целиком (приложение + MySQL) с автоматическим импортом базы данных и встроенными healthcheck-ами. Контейнеры успешно работают на Raspberry Pi 4.
 
-**Стек:** Docker, Docker Compose, Node.js, MySQL, Raspberry Pi
+**Стек:** Docker, Docker Compose, Node.js, MySQL, Redis, Raspberry Pi
 
 **Ссылки:** [README](4.%20Toystore%20-%20Docker%20training/README.md) · [Dockerfile](4.%20Toystore%20-%20Docker%20training/Dockerfile) · [docker-compose.yml](4.%20Toystore%20-%20Docker%20training/docker-compose.yml)
 

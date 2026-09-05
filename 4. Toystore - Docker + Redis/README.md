@@ -1,17 +1,17 @@
 
-#  ToyStore — Docker Training
+#  ToyStore — Docker + Redis Training
 
 **Цель:** Научиться контейнеризировать Node.js приложение и разворачивать его в любой среде с помощью Docker.
 
 Этот проект — продолжение [предыдущего этапа](../3.%20Toystore%20-%20node.js%20trainig/), где я перенес готовый бэкенд в Docker-контейнеры.
 
 ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-18.x-339933?logo=node.js&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-22.x-339933?logo=node.js&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.x-4479A1?logo=mysql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-7.x-DC382D?logo=redis&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-4.18.x-000000?logo=express&logoColor=white)
 ![Swagger](https://img.shields.io/badge/Swagger-85EA2D?logo=swagger&logoColor=black)
 ![Raspberry Pi](https://img.shields.io/badge/RPi-A22846?logo=raspberry-pi&logoColor=white)
-
 ---
 
 ## Оглавление
@@ -43,9 +43,9 @@
 
 | Компонент | Технология |
 |-----------|------------|
-| **Среда выполнения** | Node.js 18 (Alpine) |
+| **Среда выполнения** | Node.js 22 (Alpine) |
 | **Веб-фреймворк** | Express 4.18|
-| **База данных** | MySQL |
+| **База данных** | MySQL + Redis|
 | **Контейнеризация** | Docker + Docker Compose |
 | **Платформа деплоя** | Raspberry Pi 4 |
 | **Документация** | Swagger (OpenAPI) |
@@ -63,13 +63,14 @@ cd portfolio/"4. Toystore - Docker training"
 cp .env.example .env
 
 # 3. Запустить всё одной командой
-docker-compose up -d
+docker compose --profile with-redis up -d
 ```
 
 **Результат:**
 - Эндпоинты: http://localhost:5000
 - Swagger UI: http://localhost:5000/api-docs
 - MySQL: localhost:3306
+- Redis: localhost:6379
 
 ---
 
@@ -123,14 +124,17 @@ node index.js
 ### Сборка и запуск
 
 ```bash
-# Собрать образ и запустить контейнеры
-docker-compose up -d
+# Собрать образ и запустить контейнеры без redis
+docker compose up -d
+
+# Собрать образ и запустить контейнеры с redis
+docker compose --profile with-redis up -d
 
 # Собрать образ без кэша (принудительно)
-docker-compose build --no-cache
+docker compose build --no-cache
 
 # Пересобрать и запустить
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 
@@ -145,9 +149,51 @@ docker-compose up -d --build
 | **Платформа** | Raspberry Pi 4 |
 | **ОС** | Raspberry Pi OS (64-bit) |
 | **Docker** | Docker CE |
-| **Порты** | 5000 (API), 3306 (MySQL) |
+| **Порты** | 5000 (API), 3306 (MySQL), 6379(Redis) |
 
 ![скриншот пи с контейнерами в vscode](./pi-deploy.png)
+## Redis: Кеширование, Rate Limiting и отказоустойчивость
+
+В рамках развития проекта я интегрировал Redis — высокопроизводительное in-memory хранилище. Это позволило значительно ускорить работу API, защитить сервер от перегрузок и реализовать отказоустойчивую систему хранения refresh-токенов.
+### Что реализовано:
+#### 1. Кеширование GET-запросов (Cache-Aside)
+
+- Кешируются ответы на GET-запросы к API (списки товаров, категории, детали товара).
+- Время жизни кеша (TTL) настраивается индивидуально для каждого эндпоинта.
+Автоматическая инвалидация кеша при изменении данных (создание, обновление, удаление товаров).
+- При первом запросе данные загружаются из MySQL и сохраняются в Redis; все последующие запросы возвращаются из кеша.
+
+#### 2. Rate Limiting (Ограничение частоты запросов)
+- Защита API от DDoS-атак и ботов.
+- Настраиваемый лимит: по умолчанию 100 запросов в минуту с одного IP-адреса.
+- При превышении лимита возвращается HTTP 429 Too Many Requests.
+- Используется атомарная операция INCR для точного подсчёта в распределённой среде.
+#### 3. Гибридное хранение Refresh-токенов (Redis + MySQL)
+- Refresh-токены хранятся одновременно в Redis (для быстрого доступа) и MySQL (как резервное хранилище).
+- При падении Redis система автоматически переключается на MySQL без потери функциональности.
+- При восстановлении Redis данные синхронизируются.
+#### 4. Отказоустойчивость
+- Все запросы к Redis обёрнуты в try/catch с graceful fallback.
+- Если Redis недоступен:
+
+    - Кеширование отключается (данные читаются напрямую из MySQL).  
+
+    - Rate Limiting отключается (запросы проходят без ограничений).  
+
+    - Токены читаются из MySQL.  
+
+- При восстановлении Redis все функции автоматически возобновляются.
+
+Сервис сохраняет 100% доступность даже при падении Redis.
+### Технические детали
+| Компонент | Технология |
+|-----------|------------|
+| **Redis-клиент** | ioredis |
+| **Контейнеризация** | Redis в Docker-контейнере |
+| **Структуры данных** | Strings (кеш, токены), атомарные счетчики |
+| **Стратегия кеширования** | Cache-Aside с TTL 300-600 секунд |
+| **Паттерны** | Singleton для подключения, Middleware для кеша и лимитов |
+
 
 ## Что я освоил
 
@@ -160,8 +206,16 @@ docker-compose up -d --build
 | **Тома (Volumes)** | Сохранение данных БД |
 | **Сети (Networks)** | Взаимодействие контейнеров |
 | **Деплой на RPi** | Развертывание на Raspberry Pi 4 |
-
+| **NoSQL базы данных** | Понимание принципов работы in-memory хранилищ |
+| **Redis структуры данных** | Strings, атомарные операции (INCR) |
+| **TTL (Time To Live)** | Автоматическое удаление устаревших данных |
+| **Cache-Aside паттерн** | Кеширование с инвалидацией |
+| **Rate Limiting** | Защита API с помощью атомарных счётчиков |
+| **Гибридное хранение** | Redis + MySQL для надёжности и скорости |
+| **Отказоустойчивость** | Fallback-механизмы при падении Redis |
+| **Middleware в Express** | Кеширование и лимиты на уровне маршрутов |
+| **Singleton паттерн** | Единое подключение к Redis для всего приложения |
 ---
 ## Дальнейшие планы  
 
-Redis, кеширование частых запросов, хранение токенов, обучение работе с nosql.
+Jest, автоматизация тестирования
