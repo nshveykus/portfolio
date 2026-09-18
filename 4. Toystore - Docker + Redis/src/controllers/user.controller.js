@@ -105,8 +105,13 @@ const login = async (req, res) => {
     // #swagger.tags = ['User', 'Admin']
 // #swagger.summary = Логин
 // #swagger.description =  Ради удобства дефолтные значения - администраторские
-// #swagger.parameters[email] = {default: 'admintest@mail.ru'}
-// #swagger.parameters[password] = {default: 'admintest'}
+/* #swagger.requestBody = {
+    content: {
+        "application/json": {
+            example: { email: "admintest@mail.ru", password: "admintest" }
+        }
+    }
+} */
     try {
         const { email, password } = req.body;
         const sessionId = req.headers['x-session-id'];

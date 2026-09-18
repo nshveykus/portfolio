@@ -93,7 +93,6 @@ class User {
     
     // Если у пользователя уже есть корзина — не переносим
     if (userCart.length > 0) {
-        console.log('У пользователя уже есть корзина, пропускаем перенос');
         return null;
     }
     
@@ -104,7 +103,6 @@ class User {
     );
     
     if (guestCart.length === 0) {
-        console.log('ℹ️ Гостевая корзина пуста');
         return null;
     }
     
@@ -113,8 +111,6 @@ class User {
         'UPDATE carts SET user_id = ?, session_id = NULL WHERE session_id = ?',
         [userId, sessionId]
     );
-    
-    console.log(`Перенесено ${result.affectedRows} товаров из гостевой корзины`);
     return result;
 }
 

@@ -78,6 +78,24 @@
 
 ---
 
+## [4. Toystore - Jest](/5.%20Toystore%20-%20Jest/)
+
+**Цель:** Научиться написанию автотестов на примере Jest. Покрыть тестами самую чувствительную часть кода - модели и контроллеры, касающиеся заказов и пользователей.
+**Итог:** Покрытие тестами ~~60%, 38 passed, 4 suites.
+**Освоеные приемы:**
+- `jest.mock()` для подмены модулей (`db`, `bcryptjs`, `redis.service`).
+- `mockResolvedValue` / `mockResolvedValueOnce` / `mockRejectedValueOnce` 
+  для управления последовательностью ответов.
+- `jest.spyOn()` для подмены отдельных методов класса (`UserModel.findById`) 
+  с последующим `mockRestore()`.
+- `jest.clearAllMocks()` в `beforeEach` для изоляции тестов.
+- Моки `console.error` / `console.log`, чтобы не засорять вывод.
+- `testEach` для разных переданных полей.
+
+---
+Следущий мой шаг - сделать фронт.
+---
+
 Связаться со мной: nshveykus@gmail.com
 
 ---

@@ -108,6 +108,13 @@ class OrdersModel {
         if (cartItems.length === 0) {
             throw new Error('Корзина пуста');
         }
+    const [pm] = await pool.execute(
+    'SELECT id FROM payment_methods WHERE id = ?', 
+    [payment_method_id]
+    );
+    if (pm.length === 0) {
+    throw new Error('Неверный способ оплаты');
+    }
         // стартуем транзакцию
     const connection = await pool.getConnection();
     await connection.beginTransaction();

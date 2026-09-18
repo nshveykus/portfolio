@@ -25,7 +25,5 @@ Thumbs.db
 
 
 # Тесты и временные файлы
-test.js
-check.js
 temp/
 tmp/

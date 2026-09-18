@@ -87,7 +87,9 @@ const createOrder = async (req, res) =>{
         if (error.message.includes('Недостаточно товара')) {
             return res.status(400).json({ success: false, message: error.message });
         }
-
+        if (error.message.includes('Неверный способ оплаты')) {
+            return res.status(400).json({ success: false, message: error.message });
+        }
         res.status(500).json({
             success: false,
             message: 'Ошибка создания заказа',
