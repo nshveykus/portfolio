@@ -1,5 +1,6 @@
 import { request } from '../api/client.js';
-
+import { showToast } from '../components/toast.js';
+import { addItem } from '../api/cart.js';
 // Состояние страницы: текущие фильтры
 // Живёт между перерисовками, пока не уйдём со страницы
 const state = {
@@ -26,6 +27,25 @@ export async function renderProducts(container) {
     <div id="products-list">Загрузка...</div>
     <div id="products-info"></div>
   `;
+  // Слушатель на добавление в корзину
+  const productsList  = container.querySelector('#products-list');
+  
+  productsList.addEventListener('click', async (e) => {
+    const addBtn = e.target.closest('.upsert');
+    if (addBtn){
+      const productId = addBtn.dataset.productId;
+      try{
+        const res = await addItem(productId);
+        addBtn.textContent = 'Еще + 1';
+        
+        showToast(`${res.message}, ${res.data.quantity} шт.`, 'success');
+      }catch(err){
+        console.error('ошибка апсёрта:', err)
+        showToast(`Не удалось добавить товар: ${err.message}`, 'error');
+      }
+    } 
+  });
+
 
   // Вешаем обработчик на отправку формы
   const form = container.querySelector('#filter-form');
@@ -65,7 +85,11 @@ async function loadProducts(container) {
     // Рендерим список
     listEl.innerHTML = `
       <ul>
-        ${products.map(p => `<li><a href="#/products/${p.id}">${p.name}</a></li>`).join('')}
+        ${products.map(p => `
+          <li>
+            <a href="#/products/${p.id}" >${p.name}</a> 
+            <button type="button" class="upsert" data-product-id="${p.id}">В корзину</button>
+          </li>`).join('')}
       </ul>
     `;
     // Показываем, сколько всего нашлось, а потом кнопки пагинации

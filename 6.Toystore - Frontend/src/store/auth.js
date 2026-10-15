@@ -1,3 +1,5 @@
+import { getAccessToken } from "../api/client";
+
 // Глобальное состояние: текущий пользователь.
 
 let currentUser = null;
@@ -11,7 +13,7 @@ export function getUser() {
 }
 
 export function isLoggedIn() {
-  return currentUser !== null;
+  return Boolean(getAccessToken());
 }
 
 export function clearUser() {

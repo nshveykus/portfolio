@@ -1,11 +1,16 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "version": "1.0.1",
+    "version": "1.0.0",
     "title": "ToyStore API",
     "description": "API для интернет-магазина. Поддерживает аутентификацию, корзину, заказы, отзывы и администрирование."
   },
- 
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": ""
+    }
+  ],
   "paths": {
     "/api/health": {
       "get": {
@@ -282,22 +287,6 @@
         "description": "Ради удобства дефолтные значения - администраторские",
         "parameters": [
           {
-            "name": "email",
-            "default": "admintest@mail.ru",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "password",
-            "default": "admintest",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "x-session-id",
             "in": "header",
             "schema": {
@@ -322,16 +311,9 @@
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "email": {
-                    "example": "any"
-                  },
-                  "password": {
-                    "example": "any"
-                  }
-                }
+              "example": {
+                "email": "admintest@mail.ru",
+                "password": "admintest"
               }
             }
           }

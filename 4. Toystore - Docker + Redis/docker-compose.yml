@@ -56,8 +56,8 @@ services:
       - redis_data:/data
     networks:
       - toystore-network
-    profiles:
-      - with-redis
+#    profiles:
+#      - with-redis
 
 volumes:
   mysql_data:

@@ -39,13 +39,13 @@ const addItem = async (req, res) => {
         }
         const userId = req.user ? req.user.id : null;
         const sessionId = req.session_id;
-        const cart = await CartModel.addItem(userId, sessionId, productId, quantity)
+        const result = await CartModel.addItem(userId, sessionId, productId, quantity)
     res.json({
     success: true,
     message: 'Товар добавлен в корзину',
     data: {
         product_id: productId,
-        quantity: quantity
+        quantity: result.quantity
     }
 });
     } catch (error){

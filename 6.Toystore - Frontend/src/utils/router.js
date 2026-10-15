@@ -52,7 +52,7 @@ export function startRouter(container) {
   render(); // первый рендер при загрузке
 }
 
-// Программная навигация (пригодится позже)
+// Программная навигация
 export function navigate(path) {
   window.location.hash = path;
 }

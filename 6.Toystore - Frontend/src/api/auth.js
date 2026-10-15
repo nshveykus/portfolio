@@ -1,4 +1,7 @@
 import { request, saveTokens, clearTokens } from './client.js';
+import { getUser, setUser, isLoggedIn } from '../store/auth.js';
+
+
 
 export async function login(email, password) {
   const res = await request('/auth/login', {
@@ -32,4 +35,18 @@ export async function getProfile() {
 
 export async function updateProfile(payload) {
   return request('/auth/profile', { method: 'PUT', body: payload });
+}
+
+
+
+
+
+// Возвращает объект пользователя или null, если не авторизован.
+export async function ensureUser() {
+  const cached = getUser();
+  if (cached) return cached; // ежели есть в хранилище, то возвращаем
+  if (!isLoggedIn()) return null; // если не залогиненн, то нулл
+  const res = await getProfile(); // В остальных случаях зовем бекенд
+  setUser(res.data);
+  return res.data;
 }

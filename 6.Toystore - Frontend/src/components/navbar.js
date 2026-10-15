@@ -1,4 +1,11 @@
-import { isLoggedIn, getUser, clearUser } from '../store/auth.js';
+import { isLoggedIn, clearUser } from '../store/auth.js';
+import { navigate } from '../utils/router.js';
+import { logout } from '../api/auth.js';
+import { getCount } from '../store/cart.js';
+import { on } from '../utils/events.js';
+
+// подписка на изменения корзины
+on('cart-changed', renderNavbar);
 
 export async function renderNavbar() {
 
@@ -6,22 +13,26 @@ export async function renderNavbar() {
     ? `<a href="#/profile">Профиль</a> | <a href="#" id="logout-link">Выйти</a>`
     : `<a href="#/login">Войти</a>`;
 
+  const itemCount = await getCount();
 
-
- const nav = document.getElementById('navbar');
+  const nav = document.getElementById('navbar');
     nav.innerHTML = `
-    <a href="#/health">Health</a> |
-    <a href="#/dbcheck">DB check</a> |
-    <a href="#/products">Товары</a> |
-    ${authLinks}
-`;
+      <a href="#/health">Health</a> |
+      <a href="#/dbcheck">DB check</a> |
+      <a href="#/products">Товары</a> |
+      <a href="#/cart">Корзина(${itemCount})</a> |
+      ${authLinks}
+    `;
 
   // Пока не залогинен — слушателя нет, и это ок
   const logoutLink = nav.querySelector('#logout-link');
   if (logoutLink) {
     logoutLink.addEventListener('click', async (e) => {
       e.preventDefault();
-      // Логика логаута — добавим позже
+      clearUser();
+      await logout();
+      navigate('/login')
+      renderNavbar();
     });
   }
 

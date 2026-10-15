@@ -43,13 +43,38 @@ class CartModel {
     }
 // upsert корзины. Создать корзину или добавить товар
     static async addItem(userId, sessionId, productId, quantity){
-        await this.checkStock(productId, quantity);
+        let currentQuantity = 0;
+        if (userId) {
+            const [rows] = await pool.execute(
+                'SELECT quantity FROM carts WHERE user_id = ? AND product_id = ?',
+                [userId, productId]
+            );
+            currentQuantity = rows[0]?.quantity || 0;
+        } else if (sessionId) {
+            const [rows] = await pool.execute(
+                'SELECT quantity FROM carts WHERE session_id = ? AND product_id = ?',
+                [sessionId, productId]
+            );
+            currentQuantity = rows[0]?.quantity || 0;
+        }
+        const totalQuantity = currentQuantity + quantity;
+        await this.checkStock(productId, totalQuantity);
+        //наконец, апсёрт
         const query = `
         insert into carts (user_id, session_id, product_id, quantity)
         values (?, ?, ?, ?)
         on duplicate key update quantity = quantity + values(quantity)`;
         const [result] = await pool.execute(query, [userId, sessionId, productId, quantity]);
-        return result;
+    // Получаем реальное количество из БД
+    const [rows] = await pool.execute(
+        `SELECT quantity FROM carts 
+         WHERE product_id = ? AND ((user_id = ?) OR (session_id = ?))`,
+        [productId, userId, sessionId]
+    );
+
+    return {
+        quantity: rows[0]?.quantity || 0
+    };
     }
 // put изменить количество товаара в корзине
     static async updateQuantity(userId, sessionId, productId, quantity){
