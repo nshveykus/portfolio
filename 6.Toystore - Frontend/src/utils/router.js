@@ -1,8 +1,8 @@
 const routes = [];
 
 // Зарегистрировать маршрут. pattern может содержать параметры вида :id
-export function route(pattern, handler) {
-  routes.push({ pattern, handler });
+export function route(pattern, handler, options={}) {
+  routes.push({ pattern, handler, auth: options.auth === true });
 }
 
 // Компилируем шаблон в регулярку один раз при регистрации
@@ -28,28 +28,43 @@ function match(path) {
       params[name] = decodeURIComponent(m[i + 1]);
     });
 
-    return { handler: r.handler, params };
+    return { handler: r.handler, params, auth: r.auth };
   }
   return null;
 }
 
 // Стартовать роутер: слушаем hashchange и рендерим при каждом изменении
-export function startRouter(container) {
-  const render = () => {
+export function startRouter(container, { requireAuth } = {}) {
+  const render = async () => {
     const path = window.location.hash.slice(1) || '/';
     const found = match(path);
 
-    container.innerHTML = '';
-
-    if (found) {
-      found.handler(container, found.params);
-    } else {
+    if (!found) {
       container.innerHTML = '<h1>404</h1><p>Страница не найдена</p>';
+      return;
     }
+
+    // Если маршрут защищённый — проверяем
+    if (found.auth && requireAuth) {
+      // Пока идёт проверка, можем показать лоадер
+      container.innerHTML = '<p>Проверка авторизации...</p>';
+      
+      const user = await requireAuth();
+      
+      if (!user) {
+        // Не авторизован — редирект на логин
+        navigate('/login');
+        return;
+      }
+    }
+
+    // Если дошли сюда — авторизация пройдена (или не требовалась)
+    container.innerHTML = '';
+    found.handler(container, found.params);
   };
 
   window.addEventListener('hashchange', render);
-  render(); // первый рендер при загрузке
+  render(); // первый рендер
 }
 
 // Программная навигация

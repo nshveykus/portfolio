@@ -10,8 +10,8 @@ on('cart-changed', renderNavbar);
 export async function renderNavbar() {
 
   const authLinks = isLoggedIn()
-    ? `<a href="#/profile">Профиль</a> | <a href="#" id="logout-link">Выйти</a>`
-    : `<a href="#/login">Войти</a>`;
+    ? `<a href="#/profile">Профиль</a> | <a href="#" id="logout-link">Выйти</a> | <a href="#/orders">Заказы</a>`
+    : `<a href="#/login">Войти</a> | <a href="#/register">Регистрация</a>`;
 
   const itemCount = await getCount();
 

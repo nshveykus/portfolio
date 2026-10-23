@@ -1,16 +1,15 @@
-import { ensureUser, updateProfile } from '../api/auth.js';
+import { updateProfile } from '../api/auth.js';
 import { setUser } from '../store/auth.js';
-import { navigate } from '../utils/router.js';
 import { formatDate } from '../utils/format.js';
-
+import { ensureUser } from '../api/auth.js';
 
 export async function renderProfile(container) {
 // получаем юзера. Ели нет - редирект на логинку
     const user = await ensureUser();
-    if (!user) {
-        navigate('/login');
-        return;
-    }
+//    if (!user) {
+//        navigate('/login');
+//        return;
+//    } Вшил в роутер, теперь можно убрать отсудова
 
     container.innerHTML = `
         <h1>Профиль</h1>
@@ -58,7 +57,6 @@ export async function renderProfile(container) {
 }
 async function loadProfile(container, user) {
     const infoBlock = container.querySelector('#profile-info');
-    console.log(user);
     infoBlock.innerHTML =`
         <p>Имя: ${user.first_name}</p>
         <p>Фамилия: ${user.last_name}</p>

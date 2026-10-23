@@ -14,11 +14,13 @@ export async function login(email, password) {
 }
 
 export async function register(payload) {
-  return request('/auth/register', {
+  const res = await request('/auth/register', {
     method: 'POST',
     body: payload,
     auth: false,
   });
+  saveTokens(res.data.tokens);
+  return res.data.user;
 }
 
 export async function logout() {
