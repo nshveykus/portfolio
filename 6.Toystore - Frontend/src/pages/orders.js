@@ -7,14 +7,15 @@ export async function renderOrdersPage(container) {
         <h1>Заказы</h1>
         <div id="orders_list">Загрузка...</div>
     `;
+    // Листенер на переход на конкретный заказ. Листенеры лучше вешать один раз!
         const ordersList = container.querySelector('#orders_list');
         ordersList.addEventListener('click', (e) =>{
             const oneOrderDiv = e.target.closest('.oneOrder')
             if(oneOrderDiv){
-                console.log(oneOrderDiv);
                 navigate(`/orders/${oneOrderDiv.dataset.id}`) 
             }
         });
+//первая загрузка
 loadOrders(container);
 }
 async function loadOrders(container) {

@@ -3,7 +3,7 @@ class ReviewModel {
 // получение отзывов конкретного товара
 static async getReviews(productId){
     const query = `
-    select r.rating, u.first_name, u.last_name, r.comment, r.created_at
+    select r.rating, u.first_name, u.last_name, r.user_id, r.comment, r.created_at
     from reviews r
     join users u on r.user_id = u.id
     where product_id = ?

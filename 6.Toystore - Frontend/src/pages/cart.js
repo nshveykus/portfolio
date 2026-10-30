@@ -1,5 +1,6 @@
 import { loadCart, updateItem, removeItem, clearCart } from '../api/cart.js';
 import { showToast } from '../components/toast.js';
+import { navigate } from '../utils/router.js';
 export async function renderCartPage(container) {
 
     container.innerHTML = `
@@ -58,10 +59,9 @@ export async function renderCartPage(container) {
             showToast(`Корзина очищена`, 'success');
         }catch (err) {showToast(`Ошибка Удаления: ${err.message}`, 'error');};
     });
-
-
-
-
+    
+    const orderButton = container.querySelector('#order');
+    orderButton.addEventListener('click', () =>{navigate('/neworder')} );   
     await renderCartList(container);
 }
 

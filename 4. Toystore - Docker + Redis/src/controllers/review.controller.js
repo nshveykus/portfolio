@@ -19,7 +19,7 @@ const getReviews = async (req, res) => {
         console.error('Ошибка получения отзывов:', error);
         res.status(500).json({
             success: false,
-            message: 'оШибка получения отзывов',
+            message: 'Oшибка получения отзывов',
             error: error.message
         })
     }

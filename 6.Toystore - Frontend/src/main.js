@@ -15,6 +15,7 @@ import { renderRegisterPage } from './pages/register.js';
 import { loadCart } from './api/cart.js';
 import { renderOrdersPage } from './pages/orders.js';
 import { renderOrderPage } from './pages/orderpage.js';
+import { renderNewOrderPage } from './pages/neworder.js';
 
 const app = document.getElementById('app');
 
@@ -34,6 +35,7 @@ route('/register', renderRegisterPage);
 route('/profile', renderProfile, { auth: true });
 route('/orders', renderOrdersPage, { auth: true });
 route('/orders/:id', renderOrderPage, { auth: true });
+route('/neworder', renderNewOrderPage, {auth:true});
 // Запускаем роутер
 startRouter(app, {
   requireAuth: async () => {return await ensureUser();}

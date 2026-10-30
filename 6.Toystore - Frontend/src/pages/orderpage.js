@@ -1,6 +1,6 @@
 import { getOrder } from "../api/orders";
 import { getOrderStatuses, getPaymentMethods } from "../api/references";
-import { formatDate } from "../utils/format";
+import { formatDate, escapeHtml } from "../utils/format";
 import { navigate } from "../utils/router";
 
 
@@ -15,13 +15,17 @@ export async function renderOrderPage(container, { id }){
     const orderInfo = container.querySelector('#order-info');
     const orderItemsList = container.querySelector('#order-items');
     const toOrders = container.querySelector('#to-orders');
+    //просто кнопка "назад"
     toOrders.addEventListener('click', (e) =>{
         navigate('/orders');
     });
+    // листенер перекидывает на страничку товара при шелчке на товар
     orderItemsList.addEventListener('click', (e) =>{
         const oneOrderItem = e.target.closest('.one-order-item')
         if(oneOrderItem){navigate(`/products/${oneOrderItem.dataset.id}`)}
     })
+
+    //Пытаемся зарузить справочники, не выйдет - покажем нейм или неизвестно
     let orderStatuses = [];
     let paymentMethods = [];
     try {
@@ -33,16 +37,17 @@ export async function renderOrderPage(container, { id }){
     try{
         const res = await getOrder(id)
         const orderData = res.data;
-        console.log(orderData);
-        const orderItems = orderData.items || [];
+        const orderItems = orderData.items || []; //не забывать проверку на андефайнд
         orderInfo.innerHTML=`
         <p> от ${formatDate(orderData.order_date)}</p>
         <p>${orderStatuses.find(item => item.id === orderData.status?.id)?.description || orderData.status?.name || 'Статус заказа неизвестен'}</p>
         <p>Сумма заказа: ${orderData.total_amount} ₽</p>
         <p>${(orderData.is_paid)?"Оплачен":"Заказ ожидает оплаты"}${(!orderData.is_paid)?`, выбранный способ оплаты: ${paymentMethods.find(item => item.id === orderData.payment_method?.id)?.description || orderData.payment_method?.name || 'неизвестен'}`:``}</p>
         <p>Дата доставки ${formatDate(orderData.delivery_date)}</p>
-        <p>Адрес доставки: ${orderData.delivery_address}</p>
+        <p>Адрес доставки: ${escapeHtml(orderData.delivery_address)}</p>
+        <p>Комментарий: ${escapeHtml(orderData.comment)}</p>
         `;
+        // в иннераштимеле неудобно коммментировать, но вот та адовая строка - просто два тернаных ифа и фолбек если не удалось загрузить справочники
         orderItemsList.innerHTML=`${(orderItems.length > 0)? `
             <p>Состав заказа:</p><ul>
             ${orderItems.map(oi =>`
