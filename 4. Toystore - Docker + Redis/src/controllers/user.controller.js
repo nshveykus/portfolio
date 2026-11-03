@@ -34,6 +34,7 @@ const generateTokens = (user) => {
 const register = async (req, res) => {
     // #swagger.tags = ['User']
     // #swagger.summary = регистрация
+    
 
     try {
         // 1. Получаем данные из тела запроса
@@ -105,13 +106,16 @@ const login = async (req, res) => {
     // #swagger.tags = ['User', 'Admin']
 // #swagger.summary = Логин
 // #swagger.description =  Ради удобства дефолтные значения - администраторские
+//#swagger.security = [{"bearerAuth": []}]
 /* #swagger.requestBody = {
     content: {
         "application/json": {
             example: { email: "admintest@mail.ru", password: "admintest" }
         }
     }
-} */
+       
+}
+     */
     try {
         const { email, password } = req.body;
         const sessionId = req.headers['x-session-id'];
@@ -248,6 +252,7 @@ const refreshToken = async (req, res) => {
 const logout = async (req, res) => {
         // #swagger.tags = ['User']
     // #swagger.summary = Выход
+ //   #swagger.security = [{"bearerAuth": []}]
     try {
         const refreshToken = req.body.refresh_token || req.headers['x-refresh-token'];
         
@@ -276,6 +281,7 @@ const logout = async (req, res) => {
 const getProfile = async (req, res) => {
         // #swagger.tags = ['User']
     // #swagger.summary = Получить свой профиль
+    //#swagger.security = [{"bearerAuth": []}]
     try {
         const user = await User.findById(req.user.id);
         if (!user) {
@@ -304,6 +310,7 @@ const updateProfile = async (req, res) => {
 
         // #swagger.tags = ['User']
     // #swagger.summary = Обновление профиля
+    //#swagger.security = [{"bearerAuth": []}]
     try {
         const userId = req.user.id;
         const { first_name, last_name, phone, birth_date, password } = req.body;

@@ -10,6 +10,7 @@
 - [Аутентификация](#аутентификация)
 - [Профиль пользователя](#профиль-пользователя)
 - [Корзина](#корзина)
+- [Заказы](#заказы)
 - [Отзывы](#отзывы)
 - [Админ-панель](#админ-панель)
 
@@ -1504,3 +1505,231 @@ Authorization: Bearer {{access_token}}
 ```
 
 ---
+
+
+### GET /admin/orders
+
+Получение списка **всех заказов всех пользователей** с фильтрацией и пагинацией.
+
+**Параметры запроса:**
+
+| Параметр | Тип | Описание | Пример |
+|----------|-----|----------|--------|
+| `user_id` | number | Фильтр по пользователю | `1` |
+| `status_id` | number | Фильтр по статусу | `3` |
+| `payment_method` | number | Фильтр по способу оплаты (`payment_method_id`) | `1` |
+| `is_paid` | boolean | Только оплаченные (`true`) или неоплаченные (`false`) | `true` |
+| `order_date_min` | date | Начало периода (YYYY-MM-DD) | `2026-05-22` |
+| `order_date_max` | date | Конец периода (YYYY-MM-DD) | `2026-07-22` |
+| `page` | number | Номер страницы (по умолчанию 1) | `1` |
+| `limit` | number | Заказов на странице (по умолчанию 5) | `10` |
+| `sort_by` | string | Поле сортировки (`user_id`, `order_date`) | `order_date` |
+| `sort_order` | string | Направление (`ASC` / `DESC`) | `DESC` |
+
+**Запрос (все заказы):**
+```http
+GET http://localhost:5000/api/admin/orders
+Authorization: Bearer {{access_token}}
+```
+
+**Запрос (с фильтрами):**
+```http
+GET http://localhost:5000/api/admin/orders?is_paid=true&status_id=3&order_date_min=2026-05-22&order_date_max=2026-07-22&page=1&limit=10
+Authorization: Bearer {{access_token}}
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "data": [
+        {
+            "id": 59,
+            "user_id": 5,
+            "order_date": "2026-07-23T14:40:00.000Z",
+            "total_amount": "33000.00",
+            "is_paid": true,
+            "delivery_address": "г. Екатеринбург, ул. Ленина, д. 12, кв. 7",
+            "delivery_date": "2026-07-27T00:00:00.000Z",
+            "comment": "Домофон не работает",
+            "status_id": 3,
+            "payment_method_id": 1
+        }
+    ],
+    "pagination": {
+        "total": 42,
+        "page": 1,
+        "limit": 10,
+        "total_pages": 5,
+        "has_next": true,
+        "has_prev": false
+    }
+}
+```
+
+**Ошибка (401 Unauthorized) — нет токена:**
+```json
+{
+    "success": false,
+    "message": "Требуется авторизация"
+}
+```
+
+**Ошибка (403 Forbidden) — не админ:**
+```json
+{
+    "success": false,
+    "message": "Доступ запрещен. Требуются права администратора"
+}
+```
+
+---
+
+### GET /admin/orders/:orderId
+
+Получение **деталей любого заказа** (включая чужие). Полный ответ с позициями, статусом и способом оплаты.
+
+**Запрос:**
+```http
+GET http://localhost:5000/api/admin/orders/59
+Authorization: Bearer {{access_token}}
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "data": {
+        "id": 59,
+        "order_date": "2026-07-23T14:40:00.000Z",
+        "total_amount": "153000.00",
+        "is_paid": false,
+        "delivery_address": "г. Екатеринбург, ул. Ленина, д. 12, кв. 7",
+        "delivery_date": "2026-07-27T00:00:00.000Z",
+        "comment": "Домофон не работает",
+        "status": {
+            "id": 1,
+            "name": "new",
+            "description": "Заказ создан"
+        },
+        "payment_method": {
+            "id": 1,
+            "name": "card",
+            "description": "Банковская карта"
+        },
+        "items": [
+            {
+                "product_id": 6,
+                "name": "ASUS ROG Zephyrus G14",
+                "quantity": 1,
+                "price": "150000.00",
+                "total": "150000.00",
+                "image_url": null
+            },
+            {
+                "product_id": 9,
+                "name": "Футболка хлопковая",
+                "quantity": 2,
+                "price": "1500.00",
+                "total": "3000.00",
+                "image_url": null
+            }
+        ]
+    }
+}
+```
+
+**Ошибка (404 Not Found):**
+```json
+{
+    "success": false,
+    "message": "Заказ не найден"
+}
+```
+
+---
+
+### GET /admin/products
+
+Получение **всех товаров**, включая деактивированные (`is_active = 0`). Отличие от публичного `GET /api/products`: показывает «удалённые» товары.
+
+**Параметры запроса:**
+
+| Параметр | Тип | Описание | Пример |
+|----------|-----|----------|--------|
+| `is_active` | boolean | Фильтр по статусу (`true` / `false`). Если не указан — все товары | `false` |
+| `category_id` | number | Фильтр по категории | `2` |
+| `search` | string | Поиск по названию/описанию | `iPhone` |
+| `min_price` | number | Минимальная цена | `10000` |
+| `max_price` | number | Максимальная цена | `50000` |
+| `brand` | string | Фильтр по бренду | `Apple` |
+| `on_sale` | boolean | Только со скидкой | `true` |
+| `page` | number | Номер страницы | `1` |
+| `limit` | number | Товаров на странице | `10` |
+| `sort_by` | string | Поле сортировки (`id`, `name`, `price`, `quantity`, `created_at`, `brand`) | `price` |
+| `sort_order` | string | Направление (`ASC` / `DESC`) | `DESC` |
+
+**Запрос (все товары, включая удалённые):**
+```http
+GET http://localhost:5000/api/admin/products
+Authorization: Bearer {{access_token}}
+```
+
+**Запрос (только деактивированные):**
+```http
+GET http://localhost:5000/api/admin/products?is_active=false
+Authorization: Bearer {{access_token}}
+```
+
+**Запрос (только активные, с фильтрами):**
+```http
+GET http://localhost:5000/api/admin/products?is_active=true&category_id=2&sort_by=price&sort_order=DESC
+Authorization: Bearer {{access_token}}
+```
+
+**Ответ (200 OK):**
+```json
+{
+    "success": true,
+    "data": [
+        {
+            "id": 1,
+            "name": "iPhone 15 Pro Max",
+            "description": "Флагманский смартфон Apple",
+            "price": "120000.00",
+            "old_price": "129999.00",
+            "quantity": 15,
+            "category_id": 2,
+            "brand": "Apple",
+            "sku": "IP15PM-001",
+            "image_url": null,
+            "is_active": 0,
+            "attributes": { "ram": "6GB", "diagonal": "6.1" },
+            "created_at": "2026-06-22T08:56:58.000Z",
+            "updated_at": "2026-08-17T07:31:47.000Z"
+        },
+        {
+            "id": 21,
+            "name": "Тестовый товар",
+            "price": "999.99",
+            "quantity": 10,
+            "category_id": 1,
+            "brand": "TestBrand",
+            "sku": "TEST-001",
+            "is_active": 1
+        }
+    ],
+    "pagination": {
+        "total": 20,
+        "page": 1,
+        "limit": 10,
+        "total_pages": 2,
+        "has_next": true,
+        "has_prev": false
+    }
+}
+```
+
+**Ошибка (401 / 403)** — аналогично `GET /admin/orders`.
+
+

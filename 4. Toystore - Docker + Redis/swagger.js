@@ -6,13 +6,23 @@ const doc = {
     title: 'ToyStore API',              // by default: 'REST API'
     description: 'API для интернет-магазина. Поддерживает аутентификацию, корзину, заказы, отзывы и администрирование.'         // by default: ''
   },
-  servers: [
-    {
-      url: 'http://localhost:5000',              // by default: 'http://localhost:3000'
-      description: ''       // by default: ''
-    },
-    // { ... }
-  ],
+ servers: [
+     {
+     url: 'http://pi:5000',              // by default: 'http://localhost:3000'
+     description: ''       // by default: ''
+  },
+   {
+     url: 'http://localhost:5000',              // by default: 'http://localhost:3000'
+     description: ''       // by default: ''
+  },
+    //{ ... }
+ ],
+   securityDefinitions: {
+    bearerAuth: {
+      type: 'apiKey',
+      in: 'header',       // Токен будет передаваться в заголовках
+      name: 'Authorization', // Имя заголовка
+      description: 'Введите токен в формате: Bearer <ваш_JWT_токен>'}},
 //  tags: [                   // by default: empty Array
 //    {
 //      name: '',             // Tag name

@@ -59,11 +59,13 @@ class OrdersModel {
                 comment: order.comment,
                 status: {
                     id: order.status_id,
-                    name: order.status_name
+                    name: order.status_name,
+                    description: order.status_description
                 },
                 payment_method: {
                     id: order.payment_method_id,
-                    name: order.payment_method_name
+                    name: order.payment_method_name,
+                    description: order.payment_method_description
                 },
                 items: []
             };

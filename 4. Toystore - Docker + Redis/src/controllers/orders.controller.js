@@ -6,6 +6,7 @@ require('dotenv').config();
 const getUserOrders = async (req, res) => {
     // #swagger.tags = ['Orders']
 // #swagger.summary = Получить заказы залогиненого пользователя
+// #swagger.security = [{"bearerAuth": []}]
     try {
         const orders = await OrdersModel.getUserOrders(req.user.id)
         res.json({
@@ -24,6 +25,7 @@ const getUserOrders = async (req, res) => {
 const getOrderById = async (req, res) => {
     // #swagger.tags = ['Orders']
 // #swagger.summary = Получить заказ по айди
+// #swagger.security = [{"bearerAuth": []}]
     
     try {
         const { id } = req.params;
@@ -54,6 +56,7 @@ const createOrder = async (req, res) =>{
         // #swagger.tags = ['Orders']
 // #swagger.summary = Создание заказа
 // #swagger.description = Создаем заказ из корзины. Все по acid
+// #swagger.security = [{"bearerAuth": []}]
     try{
         const userId = req.user.id;
         const { payment_method_id, delivery_address, delivery_date, comment } = req.body;

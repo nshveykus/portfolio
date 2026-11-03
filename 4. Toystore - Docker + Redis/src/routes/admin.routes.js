@@ -6,10 +6,13 @@ const { authenticate, isAdmin } = require('../middlewares/auth');
 
 
 // товары
+router.get('/products', authenticate, isAdmin, adminController.getAllProductsAdmin);
 router.post('/products', authenticate, isAdmin, adminController.createProduct);
 router.put('/products/:id', authenticate, isAdmin, adminController.updateProduct);
 router.delete('/products/:id', authenticate, isAdmin, adminController.deactivateProduct);
 // заказы
+router.get('/orders', authenticate, isAdmin, adminController.getAllOrdersAdmin);
+router.get('/orders/:id', authenticate, isAdmin, adminController.getOrderByIdAdmin);
 router.put('/orders/:orderId/status', authenticate, isAdmin, adminController.changeOrderStatus);
 // аналитика
 router.get('/analytics/summary', authenticate, isAdmin, adminController.getSalesSummary);

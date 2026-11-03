@@ -31,6 +31,7 @@ const postReview = async (req, res) => {
 // #swagger.tags = ['Reviews']
 // #swagger.summary = создание отзыва на товар
 // #swagger.description = на один товар у пользователя один отзыв
+//#swagger.security = [{"bearerAuth": []}]
     try {
         const userId = req.user.id;
         const {product_id, rating, comment} = req.body;
@@ -67,6 +68,7 @@ const postReview = async (req, res) => {
 const changeReview = async (req, res) => {
 // #swagger.tags = ['Reviews']
 // #swagger.summary = редактировать товар
+//#swagger.security = [{"bearerAuth": []}]
     try {
 const userId = req.user.id;
 const {product_id, rating, comment} = req.body;
@@ -102,6 +104,7 @@ const {product_id, rating, comment} = req.body;
 const deleteReview = async (req, res) =>{
 // #swagger.tags = ['Reviews']
 // #swagger.summary = удаление отзыва на товар
+//#swagger.security = [{"bearerAuth": []}]
         try {
 const userId = req.user.id;
 const {id} = req.params;
