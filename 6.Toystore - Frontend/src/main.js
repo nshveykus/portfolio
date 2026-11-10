@@ -16,6 +16,8 @@ import { loadCart } from './api/cart.js';
 import { renderOrdersPage } from './pages/orders.js';
 import { renderOrderPage } from './pages/orderpage.js';
 import { renderNewOrderPage } from './pages/neworder.js';
+import { renderAnalytics } from './pages/analytics.js';
+import { renderAdminOrders } from './pages/adminOrders.js';
 
 const app = document.getElementById('app');
 
@@ -36,6 +38,10 @@ route('/profile', renderProfile, { auth: true });
 route('/orders', renderOrdersPage, { auth: true });
 route('/orders/:id', renderOrderPage, { auth: true });
 route('/neworder', renderNewOrderPage, {auth:true});
+//Защищеные админские
+route('/admin/analytics', renderAnalytics, {admin:true});
+route('/admin/orders', renderAdminOrders, {admin:true});
+
 // Запускаем роутер
 startRouter(app, {
   requireAuth: async () => {return await ensureUser();}

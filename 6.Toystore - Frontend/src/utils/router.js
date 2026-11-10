@@ -2,7 +2,7 @@ const routes = [];
 
 // Зарегистрировать маршрут. pattern может содержать параметры вида :id
 export function route(pattern, handler, options={}) {
-  routes.push({ pattern, handler, auth: options.auth === true });
+  routes.push({ pattern, handler, auth: options.auth === true, admin: options.admin === true });
 }
 
 // Компилируем шаблон в регулярку один раз при регистрации
@@ -28,7 +28,7 @@ function match(path) {
       params[name] = decodeURIComponent(m[i + 1]);
     });
 
-    return { handler: r.handler, params, auth: r.auth };
+    return { handler: r.handler, params, auth: r.auth, admin: r.admin };
   }
   return null;
 }
@@ -43,20 +43,28 @@ export function startRouter(container, { requireAuth } = {}) {
       container.innerHTML = '<h1>404</h1><p>Страница не найдена</p>';
       return;
     }
+    // Если нужен админ, то авторизация ОБЯЗАТЕЛЬНА (даже если забыли auth:true)
+    const needsAuth = found.auth || found.admin;
 
     // Если маршрут защищённый — проверяем
-    if (found.auth && requireAuth) {
+    if (needsAuth && requireAuth) {
       // Пока идёт проверка, можем показать лоадер
       container.innerHTML = '<p>Проверка авторизации...</p>';
       
       const user = await requireAuth();
-      
+  
       if (!user) {
         // Не авторизован — редирект на логин
         navigate('/login');
         return;
       }
+      if(found.admin && Number(user.is_admin) !== 1){
+        container.innerHTML = '<h1>403 Forbidden</h1><p>Требуются права администратора</p>'
+        return;
+      }
+      
     }
+
 
     // Если дошли сюда — авторизация пройдена (или не требовалась)
     container.innerHTML = '';

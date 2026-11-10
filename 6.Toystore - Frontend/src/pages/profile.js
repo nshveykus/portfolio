@@ -10,7 +10,7 @@ export async function renderProfile(container) {
 //        navigate('/login');
 //        return;
 //    } Вшил в роутер, теперь можно убрать отсудова
-
+console.log(user);
     container.innerHTML = `
         <h1>Профиль</h1>
         <p id="result"></p>
