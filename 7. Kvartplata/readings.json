@@ -1,0 +1,27 @@
+[
+  {
+    "date": "2026-07-15",
+    "values": {
+      "water_cold": 0,
+      "water_hot": 0,
+      "electricity": 0
+    }
+  },
+  {
+    "date": "2026-10-05",
+    "values": {
+      "water_cold": 369,
+      "water_hot": 128,
+      "electricity": 25176.18
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "values": {
+      "water_cold": 385,
+      "water_hot": 135,
+      "electricity": 25342.56
+    },
+    "total": 5413.06
+  }
+]

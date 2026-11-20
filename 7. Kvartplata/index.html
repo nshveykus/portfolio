@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Учет показаний</title>
+  <style>
+    table {
+      margin: 12vh auto 0;
+      border-collapse: collapse;
+      width: 80%;
+      max-width: 1000px;
+    }
+    th, td {
+      border: 1px solid #d1d5db;
+      padding: 12px 16px;
+    }
+    th {
+      font-weight: 600;
+    }
+    input.new_readings::-webkit-outer-spin-button,
+    input.new_readings::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input.new_readings {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+  </style>
+</head>
+<body>
+<form id="form"></form>
+<button id="save" hidden>Сохранить</button>
+<p><button id="history">История показаний</button></p>
+<table id="history_table" hidden></table>
+<script  type="module">
+  
+//берем историю, прошлые показания и конфиг
+  const res = await fetch('/api/data');
+  const data = await res.json();
+  const services = data.config.services;
+  const lastReadings = data.last?.values ?? {};
+  const currentValues = { ...(data.last?.values ?? {}) };
+  const history = data.history;
+    //сплющиваем историю чтоб проще сделать мап
+    const flatHistory = history.map(item => ({
+        date: item.date,
+        ...item.values,             // разворачиваем
+        total: item.total ?? 0      // если поля total нет, подставится 0
+    }));
+
+//DOM
+  const form = document.querySelector('#form');
+  const historyTable = document.querySelector('#history_table');
+  const saveBttn = document.querySelector('#save');
+  const historyBttn = document.querySelector('#history');
+  //каркас и прошлые показания верстаем в табличку
+  form.innerHTML= `
+    <table>
+    <thead>
+    <tr>
+      <th>Услуга</th><th>Тариф</th><th>Прошлое показание</th><th>Новое показание</th><th>Разница</th><th>Сумма к оплате</th>
+    </tr></thead>
+    <tbody>
+    ${Object.entries(services).map(([key, service]) => 
+      `<tr data-service="${key}"><td>${service.name}</td>
+        <td>${service.price} за  ${service.unit}</td>
+        <td>${lastReadings[key] ?? ''} </td>
+        <td>${(service.type === 'meter')?`<input type="number" class="new_readings" data-service="${service.field}" value="${lastReadings[key]?? ''}" min="${lastReadings[key]?? ''}">`:''}</td>
+        <td class="diff_td"></td>
+        <td class="cost_td"></td>
+    </tr>
+    `
+    ).join('')}
+    <tr><td colspan="6" id="total" style="text-align: right;">Итого сумма к оплате 0</td></tr>
+    </tbody>
+    </table>
+  `;
+  //для прошлых показаний
+  historyTable.innerHTML= `
+    <thead><tr>
+    ${Object.keys(flatHistory[0]).map((key) => 
+      `<th>${key}</th>` 
+    ).join('')}</tr></thead>
+    <tbody>${flatHistory.map((readings) => 
+      `<tr>${Object.values(readings).map((td) => 
+        `<td>${td}</td>`
+      ).join('')}</tr>`
+    ).join('')}</tbody>
+  `
+//видимость истории
+  historyBttn.addEventListener('click', (e) => {
+   e.preventDefault();
+   historyTable.hidden = !historyTable.hidden;
+  })
+
+// сохранить новые показания и сумму к оплате
+  saveBttn.addEventListener('click', async (e) =>{
+    e.preventDefault();
+    await fetch('/api/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentValues)})
+    location.reload();
+    })
+
+//при вводе валидных новых показаний расчитываем стоимости
+  form.addEventListener('change', async (e) =>{
+    if (!e.target.matches('.new_readings')) return;
+    const readingsInput = e.target;
+    const totalTd = form.querySelector('#total');
+    const serviceField = readingsInput.dataset.service;
+    const min = Number(readingsInput.min)
+    let value = Number(readingsInput.value);
+
+    if (readingsInput.value === '' || value < min) {
+      readingsInput.value = min;
+      value = min;
+    }
+
+    currentValues[serviceField] = value;
+    const res = await fetch('/api/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentValues)
+    });
+    const calcutated = await res.json();
+    
+    renderResult(calcutated, form, services);
+    saveBttn.hidden = false;
+
+  })
+
+//заполняем табличку результатом расчетов
+function renderResult(calcutated, form, services) {
+  Object.entries(services).forEach(([key]) => {
+    const diffTd = form.querySelector(`tr[data-service="${key}"] .diff_td`);
+    const costTd = form.querySelector(`tr[data-service="${key}"] .cost_td`);
+
+    if (diffTd) diffTd.textContent = Math.round((calcutated.diffs['diff_' + key] ?? 0) * 100) / 100;
+    if (costTd) costTd.textContent = calcutated.costs['cost_' + key] ?? 0;
+  });
+
+  const total = form.querySelector('#total');
+  total.textContent = `Итого сумма к оплате: ${calcutated.total}`;
+}
+
+
+
+
+
+</script>
+</body>
+</html>

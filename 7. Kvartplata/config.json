@@ -1,0 +1,9 @@
+{
+  "services": {
+    "electricity": { "name": "Электричество", "price": 6.7,   "unit": "кВт·ч", "type":"meter", "field":"electricity" },
+    "water_cold":  { "name": "Холодная вода",  "price": 63.26,  "unit": "м³", "type":"meter", "field":"water_cold"},
+    "water_hot":   { "name": "Горячая вода", "price": 63.26, "unit": "м³", "type":"meter", "field":"water_hot"},
+    "water_calorie": { "name": "Нагрев воды", "price": 3109.18, "unit": "ккал", "type": "derived", "formula": "diff_water_hot * 0.0649" },
+    "water_outtake": { "name": "Водоотвод", "price": 62.21, "unit": "м³", "type": "derived", "formula": "diff_water_cold + diff_water_hot" }
+  }
+}
