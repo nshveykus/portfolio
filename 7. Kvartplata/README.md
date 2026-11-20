@@ -71,9 +71,9 @@
 
 ##  Использование
 
-1. Скачайте [`kvartplata.exe`](../../releases/latest) и положи рядом `config.json` и `readings.json`.
-2. Запусти `kvartplata.exe` — откроется браузер с интерфейсом.
-3. Введи показания, посмотри расчёт, нажми «Сохранить».
+1. Скачайте [`kvartplata.exe`](https://github.com/nshveykus/portfolio/releases/tag/v1.0.0_kvartplata) и положите рядом `config.json` и `readings.json`.
+2. Запустите `kvartplata.exe` — откроется браузер с интерфейсом.
+3. Введите показания, посмотрите расчёт, нажмите «Сохранить».
 
 ### Сборка из исходников
 
